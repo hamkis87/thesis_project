@@ -23,16 +23,17 @@ public class DemoProgram {
 			stateId++;
 		}
 		int initialStateId = stateList.indexOf(a.getInitialState());
-		Automaton newAutomaton = getAutomatonFromStates(initialStateId, stateList);
+		Automaton newAutomaton = getAutomatonFromStates(initialStateId, -1, stateList);
 		System.out.println("New Automaton = " + newAutomaton.getStates());
 		System.out.println("Equal Automata : " + newAutomaton.equals(c));
 
 
-		List<Character> states = Arrays.asList('a', 'b', 'c', 'd');
+		//List<Character> states = Arrays.asList('a', 'b', 'c');
 		int permutationSize = 3;
-		ArrayList<ArrayList<Integer> > permutations = getPermutations(states.size(), permutationSize);
+		ArrayList<ArrayList<Integer> > permutations = getPermutations(stateList.size(), permutationSize);
 		//System.out.println("Permutation: " + permutations.toString());
-		ArrayList<ArrayList<Automaton> > allAutomata = getAllAutomata(initialStateId, stateList, permutations, permutationSize);
+		ArrayList<ArrayList<Automaton> > allAutomata = getAllAutomata(initialStateId, stateList, 
+				                                                      permutations, permutationSize);
 	}
 	
 	public static ArrayList<ArrayList<Character> > getAutomataPermutations(ArrayList<ArrayList<Integer> > permutations, int permutationSize, List<Character>  states) {
@@ -49,23 +50,38 @@ public class DemoProgram {
 		return automataPermutations;
 	}
 	
-	/*
-	 * public static ArrayList<ArrayList<Character> >
-	 * getAutomataPermutations(ArrayList<ArrayList<Integer> > permutations, int
-	 * permutationSize, List<Character> states) { ArrayList<ArrayList<Character> >
-	 * automataPermutations = new ArrayList<ArrayList<Character> >(); for (int
-	 * automataPermutationId = 0; automataPermutationId < permutations.size();
-	 * automataPermutationId++) { ArrayList<Character> automataPermutation = new
-	 * ArrayList<Character>(); ArrayList<Integer> permutation =
-	 * permutations.get(automataPermutationId); for (int variableId = 0; variableId
-	 * < permutationSize; variableId++) {
-	 * automataPermutation.add(states.get(permutation.get(variableId))); }
-	 * System.out.println(automataPermutation.toString());
-	 * automataPermutations.add(automataPermutation); } return automataPermutations;
-	 * }
-	 */
-	
-	public static Automaton getAutomatonFromStates(int initialStateId, List<State> stateList) {
+	public static ArrayList<ArrayList<Automaton> > getAllAutomata(int initialStateId, List<State> stateList, 
+			                                        ArrayList<ArrayList<Integer> > permutations, int permutationSize) {
+		ArrayList<ArrayList<Automaton> > allAutomata = new  ArrayList<ArrayList<Automaton> >(permutations.size());
+		for (int permutationId = 0; permutationId < permutations.size(); permutationId++) {
+			ArrayList<Integer> variablesAutomataAcceptStatesIds = permutations.get(permutationId);
+			// we have (permutationSize+1) variables
+			ArrayList<Automaton> automataDisjunct = new ArrayList<Automaton>(permutationSize + 1);
+			int variableId = 0;
+			// The start state of the first variable is the start state of the original automaton 
+			// i.e = initialStateId
+			int automatonInitialStateId = initialStateId;
+			while (variableId < permutationSize) {
+				int automatonAcceptStateId = variablesAutomataAcceptStatesIds.get(variableId);
+				Automaton automaton = getAutomatonFromStates(automatonInitialStateId, automatonAcceptStateId, stateList);
+				automataDisjunct.add(variableId, automaton);
+				// the automaton of the next variable starts at the accept state of the previous
+				// variable's automaton
+				automatonInitialStateId = automatonAcceptStateId;
+				variableId++;				
+			}
+			// the automaton of the last variable has the accept state(s) of the original automaton 
+			Automaton automaton = getAutomatonFromStates(automatonInitialStateId, -1, stateList);
+			automataDisjunct.add(variableId, automaton);
+			
+			// add the disjunct of the automata of variables
+			allAutomata.add(permutationId, automataDisjunct);
+		}
+		return allAutomata;
+		
+	}
+
+	public static Automaton getAutomatonFromStates(int initialStateId, int acceptStateId,  List<State> stateList) {
 		Automaton newAutomaton = new Automaton();
 		List<State> stateList2 = new ArrayList<State>(stateList.size());
 		
@@ -93,6 +109,14 @@ public class DemoProgram {
 			} 			
 		}
 		newAutomaton.setInitialState(stateList2.get(initialStateId));
+		if (acceptStateId != -1) {
+			// make all states as non-accepting states
+			for (State s: stateList2) {
+				s.setAccept(false);
+			}
+			//set the required state to be accepting one
+			stateList2.get(acceptStateId).setAccept(true);
+		}
 		newAutomaton.restoreInvariant();
 		return newAutomaton;
 	}
