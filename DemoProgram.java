@@ -2,6 +2,10 @@ import java.util.*;
 
 import dk.brics.automaton.*;
 
+/**
+ * @author hamid
+ *
+ */
 public class DemoProgram {
 
 	public static void main(String[] args) {		
@@ -19,16 +23,11 @@ public class DemoProgram {
 		for (State s :  a.getStates()) {
 			stateList.add(stateId, s);
 			//System.out.println("State = " + s.toString());
+			//this printout is to check each state i is of order i in the set 
 			System.out.println("stateList[" + stateId + "] : " + stateList.get(stateId));
 			stateId++;
 		}
 		int initialStateId = stateList.indexOf(a.getInitialState());
-		Automaton newAutomaton = getAutomatonFromStates(initialStateId, -1, stateList);
-		System.out.println("New Automaton = " + newAutomaton.getStates());
-		System.out.println("Equal Automata : " + newAutomaton.equals(c));
-
-
-		//List<Character> states = Arrays.asList('a', 'b', 'c');
 		int permutationSize = 3;
 		ArrayList<ArrayList<Integer> > permutations = getPermutations(stateList.size(), permutationSize);
 		//System.out.println("Permutation: " + permutations.toString());
@@ -54,9 +53,10 @@ public class DemoProgram {
 			                                        ArrayList<ArrayList<Integer> > permutations, int permutationSize) {
 		ArrayList<ArrayList<Automaton> > allAutomata = new  ArrayList<ArrayList<Automaton> >(permutations.size());
 		for (int permutationId = 0; permutationId < permutations.size(); permutationId++) {
+			//System.out.println("Conjunction no " + permutationId + ": ");
 			ArrayList<Integer> variablesAutomataAcceptStatesIds = permutations.get(permutationId);
 			// we have (permutationSize+1) variables
-			ArrayList<Automaton> automataDisjunct = new ArrayList<Automaton>(permutationSize + 1);
+			ArrayList<Automaton> conjunctionOfAutomata = new ArrayList<Automaton>(permutationSize + 1);
 			int variableId = 0;
 			// The start state of the first variable is the start state of the original automaton 
 			// i.e = initialStateId
@@ -64,23 +64,33 @@ public class DemoProgram {
 			while (variableId < permutationSize) {
 				int automatonAcceptStateId = variablesAutomataAcceptStatesIds.get(variableId);
 				Automaton automaton = getAutomatonFromStates(automatonInitialStateId, automatonAcceptStateId, stateList);
-				automataDisjunct.add(variableId, automaton);
+				conjunctionOfAutomata.add(variableId, automaton);
 				// the automaton of the next variable starts at the accept state of the previous
 				// variable's automaton
 				automatonInitialStateId = automatonAcceptStateId;
+				//System.out.println("Variable no: " + variableId + " has automaton: " + automaton.toString());
 				variableId++;				
 			}
 			// the automaton of the last variable has the accept state(s) of the original automaton 
 			Automaton automaton = getAutomatonFromStates(automatonInitialStateId, -1, stateList);
-			automataDisjunct.add(variableId, automaton);
-			
-			// add the disjunct of the automata of variables
-			allAutomata.add(permutationId, automataDisjunct);
+			//System.out.println("Variable no: " + variableId + " has automaton: " + automaton.toString());
+			conjunctionOfAutomata.add(variableId, automaton);
+			// add the conjunction of the automata
+			allAutomata.add(permutationId, conjunctionOfAutomata);
 		}
 		return allAutomata;
-		
 	}
 
+	/**
+	 * This method is used to construct an automaton with the same states and transitions 
+	 * in stateList. However, the new constructed automaton can have a different initial state 
+	 * and/or a different accept state. 
+	 * @param initialStateId This is the id of the initial state of the returned automaton
+	 * @param acceptStateId This is the id of the accept state of the returned automaton. It can
+	 * be -1 if it is the same as the id of accept state(s) in statelist
+	 * @param stateList This is the list of states to be used for constructing the automaton
+	 * @return
+	 */
 	public static Automaton getAutomatonFromStates(int initialStateId, int acceptStateId,  List<State> stateList) {
 		Automaton newAutomaton = new Automaton();
 		List<State> stateList2 = new ArrayList<State>(stateList.size());
@@ -89,6 +99,7 @@ public class DemoProgram {
 			State newState = new State();
 			stateList2.add(i, newState);			
 		}
+		
 		for (int i = 0; i < stateList2.size(); i++) {
 			State oldState = stateList.get(i);
 			State newState = stateList2.get(i);
