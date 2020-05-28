@@ -161,4 +161,103 @@ public class DemoProgram {
 		}
 		return permutations;
 	}
+	
+	/**
+	 * For each group of ids that represent the same variable, this method 
+	 * makes the intersection of automata that have those ids.
+	 * @param automataDisjunctions This is a disjunction of conjunctions of 
+	 * automata where each disjunct ArrayList<Automaton> is a conjunction of automata 
+	 * such that several automata might represent the same variable. 
+	 * @param equalVarIds This is the list of groups where each group
+	 * is a non-decreasing list of variable ids that represent the same variable. 
+	 * @return The disjunction of conjunctions of automata where each 
+	 * disjunct ArrayList<Automaton> is a conjunction of several automata and each 
+	 * individual automaton represent a distinct variable
+	 */
+	public static ArrayList<ArrayList<Automaton> > intersectAutomata
+				  (ArrayList<ArrayList<Automaton> > automataDisjunctions, 
+				   ArrayList<ArrayList<Integer> > equalVarIds) {
+		ArrayList<ArrayList<Automaton> > result = new  ArrayList<ArrayList<Automaton> >();
+		Map<Integer, Integer> similarIdMap = new HashMap<Integer, Integer>();
+		for (int i = 0; i < equalVarIds.size(); i++) {
+			// the group of ids representing the same variable
+			ArrayList<Integer> similarIds = equalVarIds.get(i);
+			// the least id of the variable that is represented by all subsequent ids in similarIds     
+			int similarTo = similarIds.get(0);
+			for (int j = 1; j < similarIds.size(); j++) {
+				similarIdMap.put(similarIds.get(j), similarTo); 
+			}			
+		}
+		Set<Integer> similarIdMapValues = new HashSet<Integer>(similarIdMap.values()); 
+		ArrayList<Map<Integer, Automaton> > intersections = new ArrayList<Map<Integer, Automaton> >(automataDisjunctions.size());
+		for (int i = 0; i < intersections.size(); i++) {
+			Map<Integer, Automaton> int2Automaton = new HashMap<Integer, Automaton>();
+			ArrayList<Automaton> automataConjunctions = automataDisjunctions.get(i);
+			for (int id: similarIdMapValues) {
+				Automaton automaton = automataConjunctions.get(id).clone();
+				int2Automaton.put(id, automaton);								
+			}
+			for (int keyId: similarIdMap.keySet()) {
+				int similarTo = similarIdMap.get(keyId); 
+				Automaton automaton1 = int2Automaton.get(similarTo);
+				Automaton automaton2 = automataConjunctions.get(keyId);
+				Automaton automaton3 = automaton1.intersection(automaton2);
+				int2Automaton.replace(similarTo, automaton3);					
+			}
+			intersections.add(i, int2Automaton);
+		}
+		for (int i = 0; i < intersections.size(); i++) {
+			Map<Integer, Automaton> intersection = intersections.get(i);
+			ArrayList<Automaton> automataConjunctions = automataDisjunctions.get(i);
+			ArrayList<Automaton> newAutomataConjunctions = new ArrayList<Automaton> ();
+			for (int j = 0; j < automataConjunctions.size(); j++) {
+				if (!(similarIdMap.containsKey(j))) {
+					if (intersection.containsKey(j)) {
+						newAutomataConjunctions.add(intersection.get(j));						
+					}
+					else {
+						newAutomataConjunctions.add(automataConjunctions.get(j));						
+					}
+				}													
+			}	
+		}
+		return result;
+	}
+	
+	public static void testIntersectAutomata () {
+		RegExp r0 = new RegExp("ab(c)*");
+		RegExp r1 = new RegExp("b(c)*");
+		RegExp r2 = new RegExp("(c|d)*");
+		RegExp r3 = new RegExp("(c)*");
+		RegExp r4 = new RegExp("(a|b)(c)*");
+		RegExp r5 = new RegExp("(ab(c)*|c*)");
+		RegExp r6 = new RegExp("c*");
+		RegExp r7 = new RegExp("ab|(c|d)*");
+		RegExp r8 = new RegExp("xy(c)*");
+		RegExp r9 = new RegExp("x(y)*");
+		RegExp r10 = new RegExp("(x|y)*");
+		RegExp r11 = new RegExp("x*");
+		RegExp r12 = new RegExp("y*");
+		RegExp r13 = new RegExp("(xz(y)*|z*)");
+		RegExp r14 = new RegExp("z*");
+		RegExp r15 = new RegExp("zy|(x|y)*");
+		//ArrayList<ArrayList<Automaton> >
+		Automaton a0 = r0.toAutomaton();
+		Automaton a1 = r1.toAutomaton();
+		Automaton a2 = r2.toAutomaton();
+		Automaton a3 = r3.toAutomaton();
+		Automaton a4 = r4.toAutomaton();
+		Automaton a5 = r5.toAutomaton();
+		Automaton a6 = r6.toAutomaton();
+		Automaton a7 = r7.toAutomaton();
+		Automaton a8 = r8.toAutomaton();
+		Automaton a9 = r9.toAutomaton();
+		Automaton a10 = r10.toAutomaton();
+		Automaton a11 = r11.toAutomaton();
+		Automaton a12 = r12.toAutomaton();
+		Automaton a13 = r13.toAutomaton();
+		Automaton a14 = r14.toAutomaton();
+		Automaton a15 = r15.toAutomaton();
+	} 
+
 }
