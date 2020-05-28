@@ -8,31 +8,25 @@ import dk.brics.automaton.*;
  */
 public class DemoProgram {
 
-	public static void main(String[] args) {		
-		RegExp r1 = new RegExp("ab(c|d)*");
-		RegExp r2 = new RegExp("ab(c)*");
-		Automaton a = r1.toAutomaton();
-		Automaton c = r2.toAutomaton();
-		Automaton b = a.clone();
-		b.restoreInvariant();
-		b.setDeterministic(true);
-		int numOfStates = a.getNumberOfStates();
-		System.out.println("Start State : " + a.getInitialState());
-		List<State> stateList = new ArrayList<State>(numOfStates);
-		int stateId = 0;
-		for (State s :  a.getStates()) {
-			stateList.add(stateId, s);
-			//System.out.println("State = " + s.toString());
-			//this printout is to check each state i is of order i in the set 
-			System.out.println("stateList[" + stateId + "] : " + stateList.get(stateId));
-			stateId++;
-		}
-		int initialStateId = stateList.indexOf(a.getInitialState());
-		int permutationSize = 3;
-		ArrayList<ArrayList<Integer> > permutations = getPermutations(stateList.size(), permutationSize);
-		//System.out.println("Permutation: " + permutations.toString());
-		ArrayList<ArrayList<Automaton> > allAutomata = getAllAutomata(initialStateId, stateList, 
-				                                                      permutations, permutationSize);
+	public static void main(String[] args) {
+		testIntersectAutomata();
+		/*
+		 * RegExp r1 = new RegExp("ab(c|d)*"); RegExp r2 = new RegExp("ab(c)*");
+		 * Automaton a = r1.toAutomaton(); Automaton c = r2.toAutomaton(); Automaton b =
+		 * a.clone(); b.restoreInvariant(); b.setDeterministic(true); int numOfStates =
+		 * a.getNumberOfStates(); System.out.println("Start State : " +
+		 * a.getInitialState()); List<State> stateList = new
+		 * ArrayList<State>(numOfStates); int stateId = 0; for (State s : a.getStates())
+		 * { stateList.add(stateId, s); //System.out.println("State = " + s.toString());
+		 * //this printout is to check each state i is of order i in the set
+		 * System.out.println("stateList[" + stateId + "] : " + stateList.get(stateId));
+		 * stateId++; } int initialStateId = stateList.indexOf(a.getInitialState()); int
+		 * permutationSize = 3; ArrayList<ArrayList<Integer> > permutations =
+		 * getPermutations(stateList.size(), permutationSize);
+		 * //System.out.println("Permutation: " + permutations.toString());
+		 * ArrayList<ArrayList<Automaton> > allAutomata = getAllAutomata(initialStateId,
+		 * stateList, permutations, permutationSize);
+		 */
 	}
 	
 	public static ArrayList<ArrayList<Character> > getAutomataPermutations(ArrayList<ArrayList<Integer> > permutations, int permutationSize, List<Character>  states) {
@@ -177,6 +171,7 @@ public class DemoProgram {
 	public static ArrayList<ArrayList<Automaton> > intersectAutomata
 				  (ArrayList<ArrayList<Automaton> > automataDisjunctions, 
 				   ArrayList<ArrayList<Integer> > equalVarIds) {
+		//System.out.println("in function intersectAutomata : automataDisjunctions size" + automataDisjunctions.size());
 		ArrayList<ArrayList<Automaton> > result = new  ArrayList<ArrayList<Automaton> >();
 		Map<Integer, Integer> similarIdMap = new HashMap<Integer, Integer>();
 		for (int i = 0; i < equalVarIds.size(); i++) {
@@ -188,15 +183,21 @@ public class DemoProgram {
 				similarIdMap.put(similarIds.get(j), similarTo); 
 			}			
 		}
+		//System.out.println(similarIdMap.toString());
 		Set<Integer> similarIdMapValues = new HashSet<Integer>(similarIdMap.values()); 
-		ArrayList<Map<Integer, Automaton> > intersections = new ArrayList<Map<Integer, Automaton> >(automataDisjunctions.size());
-		for (int i = 0; i < intersections.size(); i++) {
+		System.out.println("similarIdMapValues : " + similarIdMapValues.toString());
+		ArrayList<Map<Integer, Automaton> > intersections = new ArrayList<Map<Integer, Automaton> >();
+		for (int i = 0; i < automataDisjunctions.size(); i++) {
+			//System.out.println("i : " + i);			
 			Map<Integer, Automaton> int2Automaton = new HashMap<Integer, Automaton>();
 			ArrayList<Automaton> automataConjunctions = automataDisjunctions.get(i);
+			//System.out.println("automataConjunctions : " + automataConjunctions.toString());
 			for (int id: similarIdMapValues) {
 				Automaton automaton = automataConjunctions.get(id).clone();
+				//System.out.println(automaton);
 				int2Automaton.put(id, automaton);								
 			}
+			//System.out.println(int2Automaton.toString());
 			for (int keyId: similarIdMap.keySet()) {
 				int similarTo = similarIdMap.get(keyId); 
 				Automaton automaton1 = int2Automaton.get(similarTo);
@@ -218,46 +219,11 @@ public class DemoProgram {
 					else {
 						newAutomataConjunctions.add(automataConjunctions.get(j));						
 					}
-				}													
-			}	
+				}
+			}
+			result.add(newAutomataConjunctions);
 		}
 		return result;
 	}
 	
-	public static void testIntersectAutomata () {
-		RegExp r0 = new RegExp("ab(c)*");
-		RegExp r1 = new RegExp("b(c)*");
-		RegExp r2 = new RegExp("(c|d)*");
-		RegExp r3 = new RegExp("(c)*");
-		RegExp r4 = new RegExp("(a|b)(c)*");
-		RegExp r5 = new RegExp("(ab(c)*|c*)");
-		RegExp r6 = new RegExp("c*");
-		RegExp r7 = new RegExp("ab|(c|d)*");
-		RegExp r8 = new RegExp("xy(c)*");
-		RegExp r9 = new RegExp("x(y)*");
-		RegExp r10 = new RegExp("(x|y)*");
-		RegExp r11 = new RegExp("x*");
-		RegExp r12 = new RegExp("y*");
-		RegExp r13 = new RegExp("(xz(y)*|z*)");
-		RegExp r14 = new RegExp("z*");
-		RegExp r15 = new RegExp("zy|(x|y)*");
-		//ArrayList<ArrayList<Automaton> >
-		Automaton a0 = r0.toAutomaton();
-		Automaton a1 = r1.toAutomaton();
-		Automaton a2 = r2.toAutomaton();
-		Automaton a3 = r3.toAutomaton();
-		Automaton a4 = r4.toAutomaton();
-		Automaton a5 = r5.toAutomaton();
-		Automaton a6 = r6.toAutomaton();
-		Automaton a7 = r7.toAutomaton();
-		Automaton a8 = r8.toAutomaton();
-		Automaton a9 = r9.toAutomaton();
-		Automaton a10 = r10.toAutomaton();
-		Automaton a11 = r11.toAutomaton();
-		Automaton a12 = r12.toAutomaton();
-		Automaton a13 = r13.toAutomaton();
-		Automaton a14 = r14.toAutomaton();
-		Automaton a15 = r15.toAutomaton();
-	} 
-
 }
