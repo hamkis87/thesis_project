@@ -9,24 +9,32 @@ import dk.brics.automaton.*;
 public class DemoProgram {
 
 	public static void main(String[] args) {
-		testIntersectAutomata();
-		/*
-		 * RegExp r1 = new RegExp("ab(c|d)*"); RegExp r2 = new RegExp("ab(c)*");
-		 * Automaton a = r1.toAutomaton(); Automaton c = r2.toAutomaton(); Automaton b =
-		 * a.clone(); b.restoreInvariant(); b.setDeterministic(true); int numOfStates =
-		 * a.getNumberOfStates(); System.out.println("Start State : " +
-		 * a.getInitialState()); List<State> stateList = new
-		 * ArrayList<State>(numOfStates); int stateId = 0; for (State s : a.getStates())
-		 * { stateList.add(stateId, s); //System.out.println("State = " + s.toString());
-		 * //this printout is to check each state i is of order i in the set
-		 * System.out.println("stateList[" + stateId + "] : " + stateList.get(stateId));
-		 * stateId++; } int initialStateId = stateList.indexOf(a.getInitialState()); int
-		 * permutationSize = 3; ArrayList<ArrayList<Integer> > permutations =
-		 * getPermutations(stateList.size(), permutationSize);
-		 * //System.out.println("Permutation: " + permutations.toString());
-		 * ArrayList<ArrayList<Automaton> > allAutomata = getAllAutomata(initialStateId,
-		 * stateList, permutations, permutationSize);
-		 */
+				
+		  RegExp r1 = new RegExp("ab(c|d)*"); 
+		  RegExp r2 = new RegExp("ab(c)*");
+		  Automaton a = r1.toAutomaton(); 
+		  Automaton c = r2.toAutomaton(); 
+		  Automaton b = a.clone(); 
+		  b.restoreInvariant(); 
+		  b.setDeterministic(true); 
+		  int numOfStates = a.getNumberOfStates(); 
+		  System.out.println("Start State : " + a.getInitialState()); 
+		  List<State> stateList = new ArrayList<State>(numOfStates); 
+		  int stateId = 0; 
+		  for (State s : a.getStates()) { 
+			  stateList.add(stateId, s); 
+			  //System.out.println("State = " + s.toString());
+			  //this printout is to check each state i is of order i in the set
+			  System.out.println("stateList[" + stateId + "] : " + stateList.get(stateId)); 
+			  stateId++; 
+		  } 
+		  int initialStateId = stateList.indexOf(a.getInitialState()); 
+		  int permutationSize = 3; 
+		  ArrayList<ArrayList<Integer> > permutations = getPermutations(stateList.size(), permutationSize);
+		  //System.out.println("Permutation: " + permutations.toString());
+		  ArrayList<ArrayList<Automaton> > allAutomata = getAllAutomata(initialStateId,
+				  						stateList, permutations, permutationSize);
+		 
 	}
 	
 	public static ArrayList<ArrayList<Character> > getAutomataPermutations(ArrayList<ArrayList<Integer> > permutations, int permutationSize, List<Character>  states) {
@@ -88,12 +96,10 @@ public class DemoProgram {
 	public static Automaton getAutomatonFromStates(int initialStateId, int acceptStateId,  List<State> stateList) {
 		Automaton newAutomaton = new Automaton();
 		List<State> stateList2 = new ArrayList<State>(stateList.size());
-		
 		for (int i = 0; i < stateList.size(); i++) {
 			State newState = new State();
 			stateList2.add(i, newState);			
 		}
-		
 		for (int i = 0; i < stateList2.size(); i++) {
 			State oldState = stateList.get(i);
 			State newState = stateList2.get(i);
@@ -105,7 +111,6 @@ public class DemoProgram {
 				State oldStateNext = oldTransition.getDest();
 				char t_min = oldTransition.getMin();
 				char t_max = oldTransition.getMax();
-				//System.out.println(oldStateNext);
 				int oldStateNextId = stateList.indexOf(oldStateNext);
 				int newStateNextId = oldStateNextId;
 				State newStateNext = stateList2.get(newStateNextId);
@@ -222,6 +227,33 @@ public class DemoProgram {
 				}
 			}
 			result.add(newAutomataConjunctions);
+		}
+		return result;
+	}
+	
+	public static ArrayList<ArrayList<Automaton> > conjunctionOfAutomataDnf2AutomataDnf
+									(ArrayList<ArrayList<Automaton> > automataDnf1,
+									 ArrayList<ArrayList<Automaton> > automataDnf2) {
+		ArrayList<ArrayList<Automaton> > result = new ArrayList<ArrayList<Automaton> > ();
+		for (int i = 0; i < automataDnf1.size(); i++) {
+			ArrayList<Automaton> conjunction1copy1 = getDeepCopy(automataDnf1.get(i));
+			for (int j = 0; j < automataDnf2.size(); j++) {
+				ArrayList<Automaton> conjunction1copy2 = getDeepCopy(conjunction1copy1);
+				ArrayList<Automaton> conjunction2copy  = getDeepCopy(automataDnf2.get(j));
+				ArrayList<Automaton> combinedConjunction = new ArrayList<Automaton> ();
+				combinedConjunction.addAll(conjunction1copy2);
+				combinedConjunction.addAll(conjunction2copy);	
+				result.add(combinedConjunction);			
+			}
+		}
+		return result;
+	}
+
+	public static ArrayList<Automaton> getDeepCopy(ArrayList<Automaton> automata) {
+		ArrayList<Automaton> result = new ArrayList<Automaton> ();
+		for (int i = 0; i < automata.size(); i++) {
+			Automaton automatonCopy = automata.get(i).clone();
+			result.add(automatonCopy);
 		}
 		return result;
 	}
