@@ -9,34 +9,34 @@ import dk.brics.automaton.*;
 public class DemoProgram {
 
 	public static void main(String[] args) {
-				
-		  RegExp r1 = new RegExp("ab(c|d)*"); 
-		  RegExp r2 = new RegExp("ab(c)*");
-		  Automaton a = r1.toAutomaton(); 
-		  Automaton c = r2.toAutomaton(); 
-		  Automaton b = a.clone(); 
-		  b.restoreInvariant(); 
-		  b.setDeterministic(true); 
-		  int numOfStates = a.getNumberOfStates(); 
-		  System.out.println("Start State : " + a.getInitialState()); 
-		  List<State> stateList = new ArrayList<State>(numOfStates); 
-		  int stateId = 0; 
-		  for (State s : a.getStates()) { 
-			  stateList.add(stateId, s); 
-			  //System.out.println("State = " + s.toString());
-			  //this printout is to check each state i is of order i in the set
-			  System.out.println("stateList[" + stateId + "] : " + stateList.get(stateId)); 
-			  stateId++; 
-		  } 
-		  int initialStateId = stateList.indexOf(a.getInitialState()); 
-		  int permutationSize = 3; 
-		  ArrayList<ArrayList<Integer> > permutations = getPermutations(stateList.size(), permutationSize);
-		  //System.out.println("Permutation: " + permutations.toString());
-		  ArrayList<ArrayList<Automaton> > allAutomata = getAllAutomata(initialStateId,
-				  						stateList, permutations, permutationSize);
-		 
+		testChangeToOneSymbolAndMinimize();
+		
+//		  RegExp r1 = new RegExp("ab(c|d)*"); 
+//		  RegExp r2 = new RegExp("ab(c)*");
+//		  Automaton a = r1.toAutomaton(); 
+//		  Automaton c = r2.toAutomaton(); 
+//		  Automaton b = a.clone(); 
+//		  b.restoreInvariant(); 
+//		  b.setDeterministic(true); 
+//		  int numOfStates = a.getNumberOfStates(); 
+//		  System.out.println("Start State : " + a.getInitialState()); 
+//		  List<State> stateList = new ArrayList<State>(numOfStates); 
+//		  int stateId = 0; 
+//		  for (State s : a.getStates()) { 
+//			  stateList.add(stateId, s); 
+//			  //System.out.println("State = " + s.toString());
+//			  //this printout is to check each state i is of order i in the set
+//			  System.out.println("stateList[" + stateId + "] : " + stateList.get(stateId)); 
+//			  stateId++; 
+//		  } 
+//		  int initialStateId = stateList.indexOf(a.getInitialState()); 
+//		  int permutationSize = 3; 
+//		  ArrayList<ArrayList<Integer> > permutations = getPermutations(stateList.size(), permutationSize);
+//		  //System.out.println("Permutation: " + permutations.toString());
+//		  ArrayList<ArrayList<Automaton> > allAutomata = getAllAutomata(initialStateId,
+//				  						stateList, permutations, permutationSize);
 	}
-	
+
 	public static ArrayList<ArrayList<Character> > getAutomataPermutations(ArrayList<ArrayList<Integer> > permutations, int permutationSize, List<Character>  states) {
 		ArrayList<ArrayList<Character> > automataPermutations = new ArrayList<ArrayList<Character> >();
 		for (int automataPermutationId = 0; automataPermutationId < permutations.size(); automataPermutationId++) {
@@ -65,7 +65,7 @@ public class DemoProgram {
 			int automatonInitialStateId = initialStateId;
 			while (variableId < permutationSize) {
 				int automatonAcceptStateId = variablesAutomataAcceptStatesIds.get(variableId);
-				Automaton automaton = getAutomatonFromStates(automatonInitialStateId, automatonAcceptStateId, stateList);
+				Automaton automaton = getAutomatonFromStates(automatonInitialStateId, automatonAcceptStateId, stateList, false);
 				conjunctionOfAutomata.add(variableId, automaton);
 				// the automaton of the next variable starts at the accept state of the previous
 				// variable's automaton
@@ -74,7 +74,7 @@ public class DemoProgram {
 				variableId++;				
 			}
 			// the automaton of the last variable has the accept state(s) of the original automaton 
-			Automaton automaton = getAutomatonFromStates(automatonInitialStateId, -1, stateList);
+			Automaton automaton = getAutomatonFromStates(automatonInitialStateId, -1, stateList, false);
 			//System.out.println("Variable no: " + variableId + " has automaton: " + automaton.toString());
 			conjunctionOfAutomata.add(variableId, automaton);
 			// add the conjunction of the automata
@@ -82,7 +82,7 @@ public class DemoProgram {
 		}
 		return allAutomata;
 	}
-
+	
 	/**
 	 * This method is used to construct an automaton with the same states and transitions 
 	 * in stateList. However, the new constructed automaton can have a different initial state 
@@ -93,7 +93,7 @@ public class DemoProgram {
 	 * @param stateList This is the list of states to be used for constructing the automaton
 	 * @return
 	 */
-	public static Automaton getAutomatonFromStates(int initialStateId, int acceptStateId,  List<State> stateList) {
+	public static Automaton getAutomatonFromStates(int initialStateId, int acceptStateId,  List<State> stateList, boolean withOnlyOneSymbolTransitions) {
 		Automaton newAutomaton = new Automaton();
 		List<State> stateList2 = new ArrayList<State>(stateList.size());
 		for (int i = 0; i < stateList.size(); i++) {
@@ -107,15 +107,28 @@ public class DemoProgram {
 				newState.setAccept(true);				
 			}
 			Set<Transition> oldStateTransitions = oldState.getTransitions();
-			for (Transition oldTransition :  oldStateTransitions) {
-				State oldStateNext = oldTransition.getDest();
-				char t_min = oldTransition.getMin();
-				char t_max = oldTransition.getMax();
-				int oldStateNextId = stateList.indexOf(oldStateNext);
-				int newStateNextId = oldStateNextId;
-				State newStateNext = stateList2.get(newStateNextId);
-				Transition newTransition = new Transition(t_min, t_max, newStateNext);
-				newState.addTransition(newTransition);								
+			if (withOnlyOneSymbolTransitions) {
+				for (Transition oldTransition :  oldStateTransitions) {
+					State oldStateNext = oldTransition.getDest();
+					int oldStateNextId = stateList.indexOf(oldStateNext);
+					char onlySingleSymbol = 'x';
+					int newStateNextId = oldStateNextId;
+					State newStateNext = stateList2.get(newStateNextId);
+					Transition newTransition = new Transition(onlySingleSymbol, newStateNext);
+					newState.addTransition(newTransition);								
+				}
+			}
+			else {
+				for (Transition oldTransition :  oldStateTransitions) {
+					State oldStateNext = oldTransition.getDest();
+					char t_min = oldTransition.getMin();
+					char t_max = oldTransition.getMax();
+					int oldStateNextId = stateList.indexOf(oldStateNext);
+					int newStateNextId = oldStateNextId;
+					State newStateNext = stateList2.get(newStateNextId);
+					Transition newTransition = new Transition(t_min, t_max, newStateNext);
+					newState.addTransition(newTransition);								
+				}
 			} 			
 		}
 		newAutomaton.setInitialState(stateList2.get(initialStateId));
@@ -128,7 +141,30 @@ public class DemoProgram {
 			stateList2.get(acceptStateId).setAccept(true);
 		}
 		newAutomaton.restoreInvariant();
+		newAutomaton.setDeterministic(true);
 		return newAutomaton;
+	}
+
+	public static void testChangeToOneSymbolAndMinimize() {
+		RegExp r = new RegExp("(aa|bb|cc)+"); 
+		Automaton a = r.toAutomaton();
+		Automaton result = changeToOneSymbolAndMinimize(a);
+		System.out.println(result);
+	}
+	
+	public static Automaton changeToOneSymbolAndMinimize(Automaton automaton) {
+		List<State> stateList = new ArrayList<State>();
+		int stateId = 0;
+		for (State s : automaton.getStates()) { 
+			  stateList.add(stateId, s); 
+			  stateId++;
+		}
+		int initialStateId = stateList.indexOf(automaton.getInitialState()); 
+		int acceptStateId = -1; // the accept state of the result is the same as the input's
+		boolean withOnlyOneSymbolTransitions = true;
+		Automaton result = 	getAutomatonFromStates(initialStateId, acceptStateId,  stateList, withOnlyOneSymbolTransitions);
+		result.minimize();
+		return result;
 	}
 	
 	public static ArrayList<ArrayList<Integer> > getPermutations(int numOfStates, int size) {
