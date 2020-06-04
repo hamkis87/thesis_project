@@ -144,12 +144,63 @@ public class DemoProgram {
 		newAutomaton.setDeterministic(true);
 		return newAutomaton;
 	}
+	
+	/**
+	 * @param lasso This is input automaton in lasso form
+	 * @return A dictionary of (k, v) pairs such that each pair represents 
+	 * the conjunct (length(x) = k + v*i) where x is the string variable 
+	 * recognized by lasso, i is a natural number
+	 */
+	public static Map<Integer, Integer> lassoAsLinearConstraint(Automaton lasso) {
+		RunAutomaton runLasso = new RunAutomaton(lasso);
+		Map<Integer, List<Integer> > stateToLength = new HashMap<Integer, List<Integer> >();
+		Map<Integer, Integer> result = new HashMap<Integer, Integer> ();
+		int startStateId = runLasso.getInitialState();
+		if (runLasso.getSize() > 1) {
+			State initialState = lasso.getInitialState();
+			List<Transition> transitions =  initialState.getSortedTransitions(true);
+			char symbol = transitions.get(0).getMin();
+			int currentStateId = startStateId;
+			for (int stepCount = 0; stepCount < 2 * runLasso.getSize(); stepCount++) {
+				if (runLasso.isAccept(currentStateId)) {
+					if (stateToLength.containsKey(currentStateId)) {
+						List<Integer> lengthConsPair = stateToLength.get(currentStateId);
+						int m = lengthConsPair.get(0);
+						int n = lengthConsPair.get(1);
+						if (n == 0) {
+							lengthConsPair.set(1, stepCount - m);
+						}
+					}
+					else {
+						List<Integer> lengthConsPair = new ArrayList<Integer> ();
+						lengthConsPair.add(0, stepCount);
+						lengthConsPair.add(1, 0);
+						stateToLength.put(currentStateId, lengthConsPair);						
+					}
+				}
+				currentStateId = runLasso.step(currentStateId, symbol); 
+			}
+			for (int key: stateToLength.keySet()) {
+				List<Integer> lengthConsPair = stateToLength.get(key);
+				int m = lengthConsPair.get(0);
+				int n = lengthConsPair.get(1);
+				result.put(m, n);
+			}
+		}
+		else {
+			result.put(0, 0);			
+		}
+		return result;
+	}
 
 	public static void testChangeToOneSymbolAndMinimize() {
-		RegExp r = new RegExp("(aa|bb|cc)+"); 
+		RegExp r = new RegExp("(aa|bb|cc)+");
 		Automaton a = r.toAutomaton();
 		Automaton result = changeToOneSymbolAndMinimize(a);
 		System.out.println(result);
+		RunAutomaton ra = new RunAutomaton(result);
+		System.out.println(ra);
+		System.out.println(ra.getCharIntervals().length);
 	}
 	
 	public static Automaton changeToOneSymbolAndMinimize(Automaton automaton) {
