@@ -49,47 +49,65 @@ public class DemoProgram {
 		//			for example if the disjunct is:
 		//					
 		//
-		String lhsOfMembershipCons1 = "abc";
-		String lhsOfMembershipCons2 = "fa";
-		String lhsOfMembershipCons3 = "gbe";
+		String lhsOfStrCons1 = "abc";
+		String lhsOfStrCons2 = "fa";
+		String lhsOfStrCons3 = "gbe";
+		String lhsOfStrCons4 = "c";
+		String lhsOfStrCons5 = "b";
 		RegExp r1 = new RegExp("xy(w|z)*");
 		RegExp r2 = new RegExp("(xy)*");
 		RegExp r3 = new RegExp("(w|z)*");
-		Automaton rhsOfMembershipCons1 = r1.toAutomaton();
-		Automaton rhsOfMembershipCons2 = r2.toAutomaton();
-		Automaton rhsOfMembershipCons3 = r3.toAutomaton();
-		List<String> lhsOfMembershipCons = new ArrayList<String> ();
-		List<Automaton> rhsOfMembershipCons = new ArrayList<Automaton> ();
-		lhsOfMembershipCons.add(0, lhsOfMembershipCons1);
-		lhsOfMembershipCons.add(1, lhsOfMembershipCons2);
-		lhsOfMembershipCons.add(2, lhsOfMembershipCons3);
+		RegExp r4 = new RegExp("(wz)*");
+		RegExp r5 = new RegExp("(xyz)*");
+		Automaton rhsOfStrCons1 = r1.toAutomaton();
+		Automaton rhsOfStrCons2 = r2.toAutomaton();
+		Automaton rhsOfStrCons3 = r3.toAutomaton();
+		Automaton rhsOfStrCons4 = r4.toAutomaton();
+		Automaton rhsOfStrCons5 = r5.toAutomaton();
+		List<String> lhsOfStrCons = new ArrayList<String> ();
+		List<Automaton> rhsOfStrCons = new ArrayList<Automaton> ();
+		lhsOfStrCons.add(0, lhsOfStrCons1);
+		lhsOfStrCons.add(1, lhsOfStrCons2);
+		lhsOfStrCons.add(2, lhsOfStrCons3);
+		lhsOfStrCons.add(3, lhsOfStrCons4);
+		lhsOfStrCons.add(4, lhsOfStrCons5);
 		//System.out.println("lhsOfMembershipCons: " + lhsOfMembershipCons);
-		rhsOfMembershipCons.add(0, rhsOfMembershipCons1);
-		rhsOfMembershipCons.add(1, rhsOfMembershipCons2);
-		rhsOfMembershipCons.add(2, rhsOfMembershipCons3);	
+		rhsOfStrCons.add(0, rhsOfStrCons1);
+		rhsOfStrCons.add(1, rhsOfStrCons2);
+		rhsOfStrCons.add(2, rhsOfStrCons3);
+		rhsOfStrCons.add(3, rhsOfStrCons4);
+		rhsOfStrCons.add(4, rhsOfStrCons5);	
 		//System.out.println("rhsOfMembershipCons: " + rhsOfMembershipCons);
-		ArrayList<ArrayList<Automaton> > membership2Simple0 = 
-				membership2Simple(lhsOfMembershipCons.get(0).length(), rhsOfMembershipCons.get(0));
+		Map<Integer, ArrayList<ArrayList<Automaton> > > simpleMembrship = 
+				new HashMap<Integer, ArrayList<ArrayList<Automaton> > >();
+		for (int i = 0; i < lhsOfStrCons.size(); i++) {
+			int noOfVars = lhsOfStrCons.get(i).length();
+			Automaton automaton = rhsOfStrCons.get(i);
+			ArrayList<ArrayList<Automaton> > simpleDnf = new ArrayList<ArrayList<Automaton> > ();
+			if (noOfVars > 1) { // the case for not simple membership 
+				simpleDnf = membership2Simple(noOfVars, automaton);				
+			}
+			else { // the case for simple membership
+				ArrayList<Automaton> simpleConjunctions = new ArrayList<Automaton> ();
+				simpleConjunctions.add(automaton);
+				simpleDnf.add(simpleConjunctions);
+			}
+			simpleMembrship.put(i, simpleDnf);			
+		}
 	}
 	
 	// precondition: noOfVars > 1
 	public static ArrayList<ArrayList<Automaton> > membership2Simple(int noOfVars, Automaton automaton) {
 		ArrayList<ArrayList<Automaton> > dnfOfSimple = new ArrayList<ArrayList<Automaton> > ();
 		ArrayList<ArrayList<Integer> > permutations = getPermutations(automaton.getNumberOfStates(), noOfVars-1);
-		System.out.println(automaton.getNumberOfStates());
-		System.out.println(noOfVars);
-		System.out.println(permutations);
 		List<State> stateList = new ArrayList<State> (); 
 		int stateId = 0; 
 		for (State s : automaton.getStates()) {
-			stateList.add(stateId, s);
-			//this printout is to check each state i is of order i in the set
-			//System.out.println("stateList[" + stateId + "] : " + stateList.get(stateId)); 
+			stateList.add(stateId, s); 
 			stateId++; 
 		}
 		int initialStateId = stateList.indexOf(automaton.getInitialState());
 		dnfOfSimple = getAllAutomata(initialStateId, stateList, permutations, noOfVars-1);
-		System.out.println(dnfOfSimple);
 		return dnfOfSimple;
 	}
 
