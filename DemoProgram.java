@@ -9,8 +9,9 @@ import dk.brics.automaton.*;
 public class DemoProgram {
 
 	public static void main(String[] args) {
-		testChangeToOneSymbolAndMinimize();
-		
+		//readUserInput();
+		//testLassoAsLinearConstraint();
+		readUserInput();
 //		  RegExp r1 = new RegExp("ab(c|d)*"); 
 //		  RegExp r2 = new RegExp("ab(c)*");
 //		  Automaton a = r1.toAutomaton(); 
@@ -36,6 +37,61 @@ public class DemoProgram {
 //		  ArrayList<ArrayList<Automaton> > allAutomata = getAllAutomata(initialStateId,
 //				  						stateList, permutations, permutationSize);
 	}
+	
+	public static void readUserInput() {
+		// for each disjunct in the user input:
+		//    example: ((abc in A1) and (len(d) < 5) and (fa not in A2) and (gbe in A3))
+		// make two parts, one with only membership constraints, the other with lenght constrains
+		// memberCons = ((abc in A1) and (fa not in A2) and (gbe in A3))
+		// lenCons = len(d) < 5
+		// 
+		// 		vars = list of the variables ordered according to their appearance in the formulas
+		//			for example if the disjunct is:
+		//					
+		//
+		String lhsOfMembershipCons1 = "abc";
+		String lhsOfMembershipCons2 = "fa";
+		String lhsOfMembershipCons3 = "gbe";
+		RegExp r1 = new RegExp("xy(w|z)*");
+		RegExp r2 = new RegExp("(xy)*");
+		RegExp r3 = new RegExp("(w|z)*");
+		Automaton rhsOfMembershipCons1 = r1.toAutomaton();
+		Automaton rhsOfMembershipCons2 = r2.toAutomaton();
+		Automaton rhsOfMembershipCons3 = r3.toAutomaton();
+		List<String> lhsOfMembershipCons = new ArrayList<String> ();
+		List<Automaton> rhsOfMembershipCons = new ArrayList<Automaton> ();
+		lhsOfMembershipCons.add(0, lhsOfMembershipCons1);
+		lhsOfMembershipCons.add(1, lhsOfMembershipCons2);
+		lhsOfMembershipCons.add(2, lhsOfMembershipCons3);
+		//System.out.println("lhsOfMembershipCons: " + lhsOfMembershipCons);
+		rhsOfMembershipCons.add(0, rhsOfMembershipCons1);
+		rhsOfMembershipCons.add(1, rhsOfMembershipCons2);
+		rhsOfMembershipCons.add(2, rhsOfMembershipCons3);	
+		//System.out.println("rhsOfMembershipCons: " + rhsOfMembershipCons);
+		ArrayList<ArrayList<Automaton> > membership2Simple0 = 
+				membership2Simple(lhsOfMembershipCons.get(0).length(), rhsOfMembershipCons.get(0));
+	}
+	
+	// precondition: noOfVars > 1
+	public static ArrayList<ArrayList<Automaton> > membership2Simple(int noOfVars, Automaton automaton) {
+		ArrayList<ArrayList<Automaton> > dnfOfSimple = new ArrayList<ArrayList<Automaton> > ();
+		ArrayList<ArrayList<Integer> > permutations = getPermutations(automaton.getNumberOfStates(), noOfVars-1);
+		System.out.println(automaton.getNumberOfStates());
+		System.out.println(noOfVars);
+		System.out.println(permutations);
+		List<State> stateList = new ArrayList<State> (); 
+		int stateId = 0; 
+		for (State s : automaton.getStates()) {
+			stateList.add(stateId, s);
+			//this printout is to check each state i is of order i in the set
+			//System.out.println("stateList[" + stateId + "] : " + stateList.get(stateId)); 
+			stateId++; 
+		}
+		int initialStateId = stateList.indexOf(automaton.getInitialState());
+		dnfOfSimple = getAllAutomata(initialStateId, stateList, permutations, noOfVars-1);
+		System.out.println(dnfOfSimple);
+		return dnfOfSimple;
+	}
 
 	public static ArrayList<ArrayList<Character> > getAutomataPermutations(ArrayList<ArrayList<Integer> > permutations, int permutationSize, List<Character>  states) {
 		ArrayList<ArrayList<Character> > automataPermutations = new ArrayList<ArrayList<Character> >();
@@ -51,6 +107,7 @@ public class DemoProgram {
 		return automataPermutations;
 	}
 	
+	// getAllAutomata should be renamed to membershipToSimple
 	public static ArrayList<ArrayList<Automaton> > getAllAutomata(int initialStateId, List<State> stateList, 
 			                                        ArrayList<ArrayList<Integer> > permutations, int permutationSize) {
 		ArrayList<ArrayList<Automaton> > allAutomata = new  ArrayList<ArrayList<Automaton> >(permutations.size());
@@ -156,51 +213,63 @@ public class DemoProgram {
 		Map<Integer, List<Integer> > stateToLength = new HashMap<Integer, List<Integer> >();
 		Map<Integer, Integer> result = new HashMap<Integer, Integer> ();
 		int startStateId = runLasso.getInitialState();
-		if (runLasso.getSize() > 1) {
-			State initialState = lasso.getInitialState();
-			List<Transition> transitions =  initialState.getSortedTransitions(true);
-			char symbol = transitions.get(0).getMin();
-			int currentStateId = startStateId;
-			for (int stepCount = 0; stepCount < 2 * runLasso.getSize(); stepCount++) {
-				if (runLasso.isAccept(currentStateId)) {
-					if (stateToLength.containsKey(currentStateId)) {
-						List<Integer> lengthConsPair = stateToLength.get(currentStateId);
-						int m = lengthConsPair.get(0);
-						int n = lengthConsPair.get(1);
-						if (n == 0) {
-							lengthConsPair.set(1, stepCount - m);
-						}
-					}
-					else {
-						List<Integer> lengthConsPair = new ArrayList<Integer> ();
-						lengthConsPair.add(0, stepCount);
-						lengthConsPair.add(1, 0);
-						stateToLength.put(currentStateId, lengthConsPair);						
+		//System.out.println("runLasso size:" + runLasso.getSize());
+		State initialState = lasso.getInitialState();
+		List<Transition> transitions =  initialState.getSortedTransitions(true);
+		char symbol = transitions.get(0).getMin();
+		int currentStateId = startStateId;
+		for (int stepCount = 0; stepCount < 2 * runLasso.getSize(); stepCount++) {
+			if (runLasso.isAccept(currentStateId)) {
+				if (stateToLength.containsKey(currentStateId)) {
+					List<Integer> lengthConsPair = stateToLength.get(currentStateId);
+					int m = lengthConsPair.get(0);
+					int n = lengthConsPair.get(1);
+					if (n == 0) {
+						lengthConsPair.set(1, stepCount - m);
 					}
 				}
-				currentStateId = runLasso.step(currentStateId, symbol); 
+				else {
+					List<Integer> lengthConsPair = new ArrayList<Integer> ();
+					lengthConsPair.add(0, stepCount);
+					lengthConsPair.add(1, 0);
+					stateToLength.put(currentStateId, lengthConsPair);						
+				}
 			}
-			for (int key: stateToLength.keySet()) {
-				List<Integer> lengthConsPair = stateToLength.get(key);
-				int m = lengthConsPair.get(0);
-				int n = lengthConsPair.get(1);
-				result.put(m, n);
+			currentStateId = runLasso.step(currentStateId, symbol);
+			if (currentStateId == -1) {  // the case when there is no loop in lasso
+				break;
 			}
 		}
-		else {
-			result.put(0, 0);			
+		for (int key: stateToLength.keySet()) {
+			List<Integer> lengthConsPair = stateToLength.get(key);
+			int m = lengthConsPair.get(0);
+			int n = lengthConsPair.get(1);
+			result.put(m, n);
 		}
 		return result;
 	}
 
-	public static void testChangeToOneSymbolAndMinimize() {
-		RegExp r = new RegExp("(aa|bb|cc)+");
+	public static void testLassoAsLinearConstraint() {
+		RegExp r = new RegExp("(aaaa|bss)*");
 		Automaton a = r.toAutomaton();
-		Automaton result = changeToOneSymbolAndMinimize(a);
+		Automaton lasso = changeToOneSymbolAndMinimize(a);
+		System.out.println("lasso has correct form: " + testLasso(lasso));
+		System.out.println("lasso :" + lasso);
+		System.out.println("lasso is deterministic : " + lasso.isDeterministic());
+		Map<Integer, Integer> result = lassoAsLinearConstraint(lasso);
 		System.out.println(result);
-		RunAutomaton ra = new RunAutomaton(result);
-		System.out.println(ra);
-		System.out.println(ra.getCharIntervals().length);
+	}
+	
+	public static boolean testLasso(Automaton automaton) {
+		boolean isLasso = true;
+		for (State s: automaton.getStates()) {
+			Set<Transition> transitions = s.getTransitions();
+			if(transitions.size() > 1) {
+				isLasso = false;
+				break;
+			}
+		}
+		return isLasso;
 	}
 	
 	public static Automaton changeToOneSymbolAndMinimize(Automaton automaton) {
@@ -214,7 +283,14 @@ public class DemoProgram {
 		int acceptStateId = -1; // the accept state of the result is the same as the input's
 		boolean withOnlyOneSymbolTransitions = true;
 		Automaton result = 	getAutomatonFromStates(initialStateId, acceptStateId,  stateList, withOnlyOneSymbolTransitions);
+		//System.out.println("getAutomatonFromStates : " + result);
+		//System.out.println("getAutomatonFromStates is deterministic : " + result.isDeterministic());
+		//result.setDeterministic(true);
+		//System.out.println("Determinize getAutomatonFromStates: " + result);
+		Automaton.setMinimization(Automaton.MINIMIZE_BRZOZOWSKI);
 		result.minimize();
+		result.restoreInvariant();
+		//System.out.println(result);
 		return result;
 	}
 	
@@ -344,5 +420,4 @@ public class DemoProgram {
 		}
 		return result;
 	}
-	
 }
