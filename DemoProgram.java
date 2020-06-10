@@ -12,36 +12,12 @@ public class DemoProgram {
 		//readUserInput();
 		//testLassoAsLinearConstraint();
 		readUserInput();
-//		  RegExp r1 = new RegExp("ab(c|d)*"); 
-//		  RegExp r2 = new RegExp("ab(c)*");
-//		  Automaton a = r1.toAutomaton(); 
-//		  Automaton c = r2.toAutomaton(); 
-//		  Automaton b = a.clone(); 
-//		  b.restoreInvariant(); 
-//		  b.setDeterministic(true); 
-//		  int numOfStates = a.getNumberOfStates(); 
-//		  System.out.println("Start State : " + a.getInitialState()); 
-//		  List<State> stateList = new ArrayList<State>(numOfStates); 
-//		  int stateId = 0; 
-//		  for (State s : a.getStates()) { 
-//			  stateList.add(stateId, s); 
-//			  //System.out.println("State = " + s.toString());
-//			  //this printout is to check each state i is of order i in the set
-//			  System.out.println("stateList[" + stateId + "] : " + stateList.get(stateId)); 
-//			  stateId++; 
-//		  } 
-//		  int initialStateId = stateList.indexOf(a.getInitialState()); 
-//		  int permutationSize = 3; 
-//		  ArrayList<ArrayList<Integer> > permutations = getPermutations(stateList.size(), permutationSize);
-//		  //System.out.println("Permutation: " + permutations.toString());
-//		  ArrayList<ArrayList<Automaton> > allAutomata = getAllAutomata(initialStateId,
-//				  						stateList, permutations, permutationSize);
 	}
 	
 	public static void readUserInput() {
 		// for each disjunct in the user input:
 		//    example: ((abc in A1) and (len(d) < 5) and (fa not in A2) and (gbe in A3))
-		// make two parts, one with only membership constraints, the other with lenght constrains
+		// make two parts, one with only string constraints, the other with length constraints
 		// memberCons = ((abc in A1) and (fa not in A2) and (gbe in A3))
 		// lenCons = len(d) < 5
 		// 
@@ -49,11 +25,11 @@ public class DemoProgram {
 		//			for example if the disjunct is:
 		//					
 		//
-		String lhsOfStrCons1 = "abc";
+		String lhsOfStrCons1 = "ab";
 		String lhsOfStrCons2 = "fa";
 		String lhsOfStrCons3 = "gbe";
 		String lhsOfStrCons4 = "c";
-		String lhsOfStrCons5 = "b";
+		String lhsOfStrCons5 = "bs";
 		RegExp r1 = new RegExp("xy(w|z)*");
 		RegExp r2 = new RegExp("(xy)*");
 		RegExp r3 = new RegExp("(w|z)*");
@@ -78,7 +54,36 @@ public class DemoProgram {
 		rhsOfStrCons.add(3, rhsOfStrCons4);
 		rhsOfStrCons.add(4, rhsOfStrCons5);	
 		//System.out.println("rhsOfMembershipCons: " + rhsOfMembershipCons);
-		Map<Integer, ArrayList<ArrayList<Automaton> > > simpleMembrship = 
+		Map<Integer, ArrayList<ArrayList<Automaton> > > simpleMembership = 
+				getsimpleMembership(lhsOfStrCons,rhsOfStrCons);
+		System.out.println(simpleMembership.get(0).size());
+		System.out.println(simpleMembership.get(1).size());
+		System.out.println(simpleMembership.get(2).size());
+		System.out.println(simpleMembership.get(3).size());
+		System.out.println(simpleMembership.get(4).size());
+		ArrayList<ArrayList<Automaton> > simpleMembershipDnf = 
+				getsimpleMembershipDnf(simpleMembership);
+		System.out.println(simpleMembershipDnf.size());
+		for (int i = 0; i < simpleMembershipDnf.size(); i++) {
+			System.out.println(simpleMembershipDnf.get(i).size());			
+		}
+				
+	}
+	
+	public static ArrayList<ArrayList<Automaton> > 
+				  getsimpleMembershipDnf(Map<Integer, ArrayList<ArrayList<Automaton> > > simpleMembership) {
+		ArrayList<ArrayList<Automaton> > result = simpleMembership.get(0);
+		for (int i = 1; i < simpleMembership.keySet().size(); i++) {
+			ArrayList<ArrayList<Automaton> > simpleMembershipDnf =
+					conjunctionOfAutomataDnf2AutomataDnf(result, simpleMembership.get(i));
+			result = simpleMembershipDnf;
+		}
+		return result;
+	}
+	
+	public static HashMap<Integer, ArrayList<ArrayList<Automaton> > > 
+	              getsimpleMembership(List<String> lhsOfStrCons, List<Automaton> rhsOfStrCons) {
+		HashMap<Integer, ArrayList<ArrayList<Automaton> > > simpleMembership = 
 				new HashMap<Integer, ArrayList<ArrayList<Automaton> > >();
 		for (int i = 0; i < lhsOfStrCons.size(); i++) {
 			int noOfVars = lhsOfStrCons.get(i).length();
@@ -92,8 +97,9 @@ public class DemoProgram {
 				simpleConjunctions.add(automaton);
 				simpleDnf.add(simpleConjunctions);
 			}
-			simpleMembrship.put(i, simpleDnf);			
-		}
+			simpleMembership.put(i, simpleDnf);			
+		}	
+		return simpleMembership;
 	}
 	
 	// precondition: noOfVars > 1
