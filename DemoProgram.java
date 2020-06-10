@@ -25,11 +25,11 @@ public class DemoProgram {
 		//			for example if the disjunct is:
 		//					
 		//
-		String lhsOfStrCons1 = "ab";
+		String lhsOfStrCons1 = "ac";
 		String lhsOfStrCons2 = "fa";
 		String lhsOfStrCons3 = "gbe";
 		String lhsOfStrCons4 = "c";
-		String lhsOfStrCons5 = "bs";
+		String lhsOfStrCons5 = "bd";
 		RegExp r1 = new RegExp("xy(w|z)*");
 		RegExp r2 = new RegExp("(xy)*");
 		RegExp r3 = new RegExp("(w|z)*");
@@ -56,20 +56,49 @@ public class DemoProgram {
 		//System.out.println("rhsOfMembershipCons: " + rhsOfMembershipCons);
 		Map<Integer, ArrayList<ArrayList<Automaton> > > simpleMembership = 
 				getsimpleMembership(lhsOfStrCons,rhsOfStrCons);
-		System.out.println(simpleMembership.get(0).size());
-		System.out.println(simpleMembership.get(1).size());
-		System.out.println(simpleMembership.get(2).size());
-		System.out.println(simpleMembership.get(3).size());
-		System.out.println(simpleMembership.get(4).size());
 		ArrayList<ArrayList<Automaton> > simpleMembershipDnf = 
 				getsimpleMembershipDnf(simpleMembership);
-		System.out.println(simpleMembershipDnf.size());
-		for (int i = 0; i < simpleMembershipDnf.size(); i++) {
-			System.out.println(simpleMembershipDnf.get(i).size());			
-		}
+		String lhsOfStrConsCombined = combineLhsOfStrCons(lhsOfStrCons);
+		//System.out.println(lhsOfStrConsCombined);
+		ArrayList<ArrayList<Integer> > equalVarIds = getEqualVarIds(lhsOfStrConsCombined);
+		System.out.println(equalVarIds);
+		
 				
 	}
 	
+	public static ArrayList<ArrayList<Integer> > getEqualVarIds(String lhsOfStrConsCombined) {
+		ArrayList<ArrayList<Integer> > equalVarIds = new ArrayList<ArrayList<Integer> > ();
+		List<Boolean> idHasBeenAdded = new ArrayList<Boolean> ();
+		for (int i = 0; i < lhsOfStrConsCombined.length(); i++) {
+			idHasBeenAdded.add(false);			
+		}
+		for (int i = 0; i < lhsOfStrConsCombined.length() - 1; i++) {
+			if (!idHasBeenAdded.get(i)) {
+				int equalVarId = i;
+				ArrayList<Integer> equalVarIdsGroup = new ArrayList<Integer> ();
+				for (int j = i + 1; j < lhsOfStrConsCombined.length(); j++) {
+					if (lhsOfStrConsCombined.charAt(equalVarId) == lhsOfStrConsCombined.charAt(j)) {
+						equalVarIdsGroup.add(equalVarId);
+						idHasBeenAdded.set(equalVarId, true);						
+						equalVarId = j;
+					}											
+				}
+				if (equalVarIdsGroup.size() > 0) {
+					equalVarIdsGroup.add(equalVarId);
+					equalVarIds.add(equalVarIdsGroup);
+				}
+			}
+		}
+		return equalVarIds;
+	}
+	
+	public static String combineLhsOfStrCons(List<String> lhsOfStrCons) {
+		String lhsOfStrConsCombined = "";
+		for (String s: lhsOfStrCons) {
+			lhsOfStrConsCombined = lhsOfStrConsCombined.concat(s);			
+		}
+		return lhsOfStrConsCombined;
+	}
 	public static ArrayList<ArrayList<Automaton> > 
 				  getsimpleMembershipDnf(Map<Integer, ArrayList<ArrayList<Automaton> > > simpleMembership) {
 		ArrayList<ArrayList<Automaton> > result = simpleMembership.get(0);
