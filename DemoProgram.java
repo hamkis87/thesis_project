@@ -66,7 +66,31 @@ public class DemoProgram {
 		System.out.println(vars);
 		ArrayList<ArrayList<Automaton> > simpleMembershipDnfIntersected = 
 				intersectSimpleMembershipDnf(simpleMembershipDnf, equalVarIds);
+		ArrayList<ArrayList<Automaton> > oneSymbolAutomataDnf = 
+				getOneSymbolAutomataDnf(simpleMembershipDnfIntersected);
+		System.out.println(simpleMembershipDnfIntersected.size() == oneSymbolAutomataDnf.size());
 				
+				
+	}
+	
+	public static ArrayList<ArrayList<Automaton> > getOneSymbolAutomataDnf
+	                            (ArrayList<ArrayList<Automaton> > simpleMembershipDnfIntersected) {
+		ArrayList<ArrayList<Automaton> > oneSymbolAutomataDnf = new ArrayList<ArrayList<Automaton> > ();
+		// boolean areLassoAll = true;
+		for (int i = 0; i < simpleMembershipDnfIntersected.size(); i++) {
+			ArrayList<Automaton> automatonConjunctions = simpleMembershipDnfIntersected.get(i);
+			ArrayList<Automaton> oneSymbolAutomataConjunctions = new ArrayList<Automaton> ();
+			for (int j = 0; j < automatonConjunctions.size(); j++) {
+				Automaton oneSymbolAutomaton = changeToOneSymbolAndMinimize(automatonConjunctions.get(j));
+				oneSymbolAutomataConjunctions.add(oneSymbolAutomaton);
+//				if (!testLasso(oneSymbolAutomaton)) {
+//					areLassoAll = false;			
+//				}
+			}
+			oneSymbolAutomataDnf.add(oneSymbolAutomataConjunctions);			
+		}
+		//System.out.println("All lasso: " + areLassoAll);
+		return oneSymbolAutomataDnf;
 	}
 	
 	public static ArrayList<ArrayList<Automaton> > intersectSimpleMembershipDnf
