@@ -68,9 +68,27 @@ public class DemoProgram {
 				intersectSimpleMembershipDnf(simpleMembershipDnf, equalVarIds);
 		ArrayList<ArrayList<Automaton> > oneSymbolAutomataDnf = 
 				getOneSymbolAutomataDnf(simpleMembershipDnfIntersected);
-		System.out.println(simpleMembershipDnfIntersected.size() == oneSymbolAutomataDnf.size());
-				
-				
+		//System.out.println(simpleMembershipDnfIntersected.size() == oneSymbolAutomataDnf.size());
+		ArrayList<ArrayList<Map<Integer, Integer> > > integerArithDnf = 
+				getIntegerArithDnf(oneSymbolAutomataDnf);
+		System.out.println(integerArithDnf);
+		
+	}
+	
+	public static ArrayList<ArrayList<Map<Integer, Integer> > > getIntegerArithDnf
+	                        (ArrayList<ArrayList<Automaton> > oneSymbolAutomataDnf) {
+		ArrayList<ArrayList<Map<Integer, Integer> > > integerArithDnf = 
+				new ArrayList<ArrayList<Map<Integer, Integer> > > ();
+		for (int i = 0; i < oneSymbolAutomataDnf.size(); i++) {
+			ArrayList<Automaton> automataConjunctions = oneSymbolAutomataDnf.get(i);
+			ArrayList<Map<Integer, Integer> > integerArithConjunctions = new ArrayList<Map<Integer, Integer> > ();
+			for (int j = 0; j < automataConjunctions.size(); j++) {
+				Map<Integer, Integer> automataAsIntegerArith = lassoAsLinearConstraint(automataConjunctions.get(j));
+				integerArithConjunctions.add(automataAsIntegerArith);
+			}
+			integerArithDnf.add(integerArithConjunctions);									
+		}
+		return integerArithDnf;
 	}
 	
 	public static ArrayList<ArrayList<Automaton> > getOneSymbolAutomataDnf
@@ -326,36 +344,47 @@ public class DemoProgram {
 		//System.out.println("runLasso size:" + runLasso.getSize());
 		State initialState = lasso.getInitialState();
 		List<Transition> transitions =  initialState.getSortedTransitions(true);
-		char symbol = transitions.get(0).getMin();
-		int currentStateId = startStateId;
-		for (int stepCount = 0; stepCount < 2 * runLasso.getSize(); stepCount++) {
-			if (runLasso.isAccept(currentStateId)) {
-				if (stateToLength.containsKey(currentStateId)) {
-					List<Integer> lengthConsPair = stateToLength.get(currentStateId);
-					int m = lengthConsPair.get(0);
-					int n = lengthConsPair.get(1);
-					if (n == 0) {
-						lengthConsPair.set(1, stepCount - m);
+		if (transitions.size() > 0) {
+			char symbol = transitions.get(0).getMin();
+			int currentStateId = startStateId;
+			for (int stepCount = 0; stepCount < 2 * runLasso.getSize(); stepCount++) {
+				if (runLasso.isAccept(currentStateId)) {
+					if (stateToLength.containsKey(currentStateId)) {
+						List<Integer> lengthConsPair = stateToLength.get(currentStateId);
+						int m = lengthConsPair.get(0);
+						int n = lengthConsPair.get(1);
+						if (n == 0) {
+							lengthConsPair.set(1, stepCount - m);
+						}
+					}
+					else {
+						List<Integer> lengthConsPair = new ArrayList<Integer> ();
+						lengthConsPair.add(0, stepCount);
+						lengthConsPair.add(1, 0);
+						stateToLength.put(currentStateId, lengthConsPair);						
 					}
 				}
-				else {
-					List<Integer> lengthConsPair = new ArrayList<Integer> ();
-					lengthConsPair.add(0, stepCount);
-					lengthConsPair.add(1, 0);
-					stateToLength.put(currentStateId, lengthConsPair);						
+				currentStateId = runLasso.step(currentStateId, symbol);
+				if (currentStateId == -1) {  // the case when there is no loop in lasso
+					break;
 				}
 			}
-			currentStateId = runLasso.step(currentStateId, symbol);
-			if (currentStateId == -1) {  // the case when there is no loop in lasso
-				break;
+			for (int key: stateToLength.keySet()) {
+				List<Integer> lengthConsPair = stateToLength.get(key);
+				int m = lengthConsPair.get(0);
+				int n = lengthConsPair.get(1);
+				result.put(m, n);
 			}
 		}
-		for (int key: stateToLength.keySet()) {
-			List<Integer> lengthConsPair = stateToLength.get(key);
-			int m = lengthConsPair.get(0);
-			int n = lengthConsPair.get(1);
-			result.put(m, n);
+		else {
+			if (initialState.isAccept()) {
+				result.put(0, 0);				
+			}
+			else {
+				result.put(-1, 0);
+			}
 		}
+		
 		return result;
 	}
 
