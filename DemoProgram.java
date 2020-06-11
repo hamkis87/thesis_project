@@ -59,11 +59,44 @@ public class DemoProgram {
 		ArrayList<ArrayList<Automaton> > simpleMembershipDnf = 
 				getsimpleMembershipDnf(simpleMembership);
 		String lhsOfStrConsCombined = combineLhsOfStrCons(lhsOfStrCons);
-		//System.out.println(lhsOfStrConsCombined);
+		System.out.println(lhsOfStrConsCombined);
 		ArrayList<ArrayList<Integer> > equalVarIds = getEqualVarIds(lhsOfStrConsCombined);
 		System.out.println(equalVarIds);
-		
+		String vars = getVars(lhsOfStrConsCombined, equalVarIds); 
+		System.out.println(vars);
+		ArrayList<ArrayList<Automaton> > simpleMembershipDnfIntersected = 
+				intersectSimpleMembershipDnf(simpleMembershipDnf, equalVarIds);
 				
+	}
+	
+	public static ArrayList<ArrayList<Automaton> > intersectSimpleMembershipDnf
+	              (ArrayList<ArrayList<Automaton> > simpleMembershipDnf, 
+	            		  ArrayList<ArrayList<Integer> > equalVarIds) {
+		ArrayList<ArrayList<Automaton> > simpleMembershipDnfIntersected = new ArrayList<ArrayList<Automaton> > ();
+		if (equalVarIds.size() == 0) {
+			simpleMembershipDnfIntersected = simpleMembershipDnf;						
+		}
+		else {
+			simpleMembershipDnfIntersected = intersectAutomata(simpleMembershipDnf, equalVarIds);
+		}
+		return simpleMembershipDnfIntersected;
+	}
+	
+	public static String getVars(String lhsOfStrConsCombined, ArrayList<ArrayList<Integer> > equalVarIds) {
+		String vars = "";
+		for (int i = 0; i < lhsOfStrConsCombined.length(); i++) {
+			boolean hasBeenAdded = false;
+			for (int j = 0; j < equalVarIds.size(); j++) {
+				if (equalVarIds.get(j).indexOf(i) > 0) {
+					hasBeenAdded = true;
+					break;
+				}				
+			}
+			if (!hasBeenAdded) {
+				vars = vars + lhsOfStrConsCombined.charAt(i);								
+			}
+		}
+		return vars;
 	}
 	
 	public static ArrayList<ArrayList<Integer> > getEqualVarIds(String lhsOfStrConsCombined) {
