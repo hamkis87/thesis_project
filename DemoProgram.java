@@ -9,8 +9,6 @@ import dk.brics.automaton.*;
 public class DemoProgram {
 
 	public static void main(String[] args) {
-		//readUserInput();
-		//testLassoAsLinearConstraint();
 		readUserInput();
 	}
 	
@@ -380,16 +378,18 @@ public class DemoProgram {
 			if (initialState.isAccept()) {
 				result.put(0, 0);				
 			}
-			else {
+			else {                  // when there is only one state with a transition and is not accepting
 				result.put(-1, 0);
 			}
 		}
-		
+		if (result.size() == 0) {   // when there are many states but none is accepting
+			result.put(-1, 1);			
+		}
 		return result;
 	}
 
 	public static void testLassoAsLinearConstraint() {
-		RegExp r = new RegExp("(aaaa|bss)*");
+		RegExp r = new RegExp("ab");
 		Automaton a = r.toAutomaton();
 		Automaton lasso = changeToOneSymbolAndMinimize(a);
 		System.out.println("lasso has correct form: " + testLasso(lasso));
