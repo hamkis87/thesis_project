@@ -1,6 +1,7 @@
 import java.util.*;
 
 import dk.brics.automaton.*;
+import com.microsoft.z3.*;
 
 /**
  * @author hamid
@@ -10,6 +11,7 @@ public class DemoProgram {
 
 	public static void main(String[] args) {
 		readUserInput();
+		testSat();
 	}
 	
 	public static void readUserInput() {
@@ -23,15 +25,15 @@ public class DemoProgram {
 		//			for example if the disjunct is:
 		//					
 		//
-		String lhsOfStrCons1 = "ac";
+		String lhsOfStrCons1 = "ab";
 		String lhsOfStrCons2 = "fa";
 		String lhsOfStrCons3 = "gbe";
 		String lhsOfStrCons4 = "c";
 		String lhsOfStrCons5 = "bd";
-		RegExp r1 = new RegExp("xy(w|z)*");
+		RegExp r1 = new RegExp("(w|z)+");
 		RegExp r2 = new RegExp("(xy)*");
-		RegExp r3 = new RegExp("(w|z)*");
-		RegExp r4 = new RegExp("(wz)*");
+		RegExp r3 = new RegExp("(w|z)+");
+		RegExp r4 = new RegExp("(wz)*|x");
 		RegExp r5 = new RegExp("(xyz)*");
 		Automaton rhsOfStrCons1 = r1.toAutomaton();
 		Automaton rhsOfStrCons2 = r2.toAutomaton();
@@ -82,6 +84,7 @@ public class DemoProgram {
 			ArrayList<Map<Integer, Integer> > integerArithConjunctions = new ArrayList<Map<Integer, Integer> > ();
 			for (int j = 0; j < automataConjunctions.size(); j++) {
 				Map<Integer, Integer> automataAsIntegerArith = lassoAsLinearConstraint(automataConjunctions.get(j));
+				System.out.println("Var " + j + " as linear: " + automataAsIntegerArith);
 				integerArithConjunctions.add(automataAsIntegerArith);
 			}
 			integerArithDnf.add(integerArithConjunctions);									
@@ -326,6 +329,29 @@ public class DemoProgram {
 		newAutomaton.restoreInvariant();
 		newAutomaton.setDeterministic(true);
 		return newAutomaton;
+	}
+	
+	public static void testSat() {
+		// ArrayList<ArrayList<Map<Integer, Integer> > > integerArithDnf 
+		// [{0=0}, {1=0}, {0=2}, {1=1}, {0=1}, {0=0, 1=0, 2=2}, {2=3}]
+		//ArrayList<Map<Integer, Integer> >  integerArithConj = new ArrayList<Map<Integer, Integer> > ();
+		final Context ctx = new Context();
+		final Solver solver = ctx.mkSimpleSolver();
+
+		IntExpr x = ctx.mkIntConst("x");
+		IntExpr y = ctx.mkIntConst("y");
+		IntExpr th = ctx.mkInt(500); 
+		IntExpr th1 = ctx.mkInt(2);
+		IntExpr th2 = ctx.mkInt(20);
+		BoolExpr t1 = ctx.mkEq(ctx.mkAdd(x,y), th);
+		BoolExpr t2 = ctx.mkEq(ctx.mkAdd(x,ctx.mkMul(th1, y)), th2);
+		solver.add(t1);
+		solver.add(t2);
+		solver.check();
+		final Model model = solver.getModel();
+
+		System.out.println(model.getConstInterp(x));
+		System.out.println(model.getConstInterp(y));
 	}
 	
 	/**
