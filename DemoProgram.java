@@ -10,7 +10,7 @@ import com.microsoft.z3.*;
 public class DemoProgram {
 
 	public static void main(String[] args) {
-		readUserInput();
+		//readUserInput();
 		testSat();
 	}
 	
@@ -332,6 +332,102 @@ public class DemoProgram {
 	}
 	
 	public static void testSat() {
+		final Context ctx = new Context();
+		final Solver solver = ctx.mkSimpleSolver();
+		// ArrayList<ArrayList<Map<Integer, Integer> > > integerArithDnf 
+		// [{0=0}, {0=2, 1=1, 2=1}, {1=3}, {1=0, 2=2}]
+		ArrayList<Map<Integer, Integer> >  integerArithConj = new ArrayList<Map<Integer, Integer> > ();
+		Map<Integer, Integer> lasso1 = new HashMap<Integer, Integer> ();
+		Map<Integer, Integer> lasso2 = new HashMap<Integer, Integer> ();
+		Map<Integer, Integer> lasso3 = new HashMap<Integer, Integer> ();
+		Map<Integer, Integer> lasso4 = new HashMap<Integer, Integer> ();
+		
+		lasso1.put(0, 0);
+		
+		lasso2.put(0, 2);
+		lasso2.put(1, 1);
+		lasso2.put(2, 1);
+		
+		lasso3.put(1, 3);
+		
+		lasso4.put(1, 0);
+		lasso4.put(2, 2);
+		
+		integerArithConj.add(lasso1);
+		integerArithConj.add(lasso2);
+		integerArithConj.add(lasso3);
+		integerArithConj.add(lasso4);
+		System.out.println(integerArithConj);
+		ArrayList<BoolExpr> linearConstraints = new ArrayList<BoolExpr> ();
+		// the length constraint for each var is : len(var) = k + v*i
+		ArrayList<IntExpr> vars = new ArrayList<IntExpr> ();
+		for (int i = 0; i < integerArithConj.size(); i++) {
+			String s = "var" + Integer.toString(i);
+			vars.add(ctx.mkIntConst(s));
+		}
+		System.out.println(vars);
+		ArrayList<Map<Integer, IntExpr> >  varKIMaps = new ArrayList<Map<Integer, IntExpr> > ();
+		for (int i = 0; i < integerArithConj.size(); i++) {
+			Map<Integer, Integer> lasso = integerArithConj.get(i);
+			//System.out.println(lasso);
+			Map<Integer, IntExpr> varKIMap = new HashMap<Integer, IntExpr> ();
+			for (int k: lasso.keySet()) {
+				String s = "var_" + Integer.toString(i) + "_" + Integer.toString(k);
+				varKIMap.put(k, ctx.mkIntConst(s));												
+			}
+			varKIMaps.add(i, varKIMap);
+		}
+		System.out.println(varKIMaps);
+		// to do: add the constraint that varioables are ge to 0
+		for (int i = 0; i < integerArithConj.size(); i++) {
+			IntExpr var = vars.get(i);
+			Map<Integer, Integer> lasso = integerArithConj.get(i);
+			System.out.println(lasso);
+			Map<Integer, IntExpr> varKIMap = varKIMaps.get(i);
+			Set<Integer> varKs = lasso.keySet();
+			if (varKs.size() == 1) {
+				for (int k: varKs) {
+					IntExpr k_term = ctx.mkInt(k);
+					IntExpr vi_term = (IntExpr) ctx.mkMul(ctx.mkInt(lasso.get(k)), varKIMap.get(k));
+					BoolExpr linearConstraint = ctx.mkEq(var, ctx.mkAdd(k_term, vi_term));	
+					linearConstraints.add(i, linearConstraint);
+					System.out.println(linearConstraint);					
+				}			
+			}
+			else {
+				BoolExpr linearConstraint = ctx.mkBool(false);
+				for (int k: varKs) {
+					IntExpr k_term = ctx.mkInt(k);
+					IntExpr vi_term = (IntExpr) ctx.mkMul(ctx.mkInt(lasso.get(k)), varKIMap.get(k));
+					BoolExpr linearConstraintDisj = ctx.mkEq(var, ctx.mkAdd(k_term, vi_term));
+					linearConstraint = ctx.mkOr(linearConstraint, linearConstraintDisj);
+				}
+				System.out.println(linearConstraint);
+				linearConstraints.add(i, linearConstraint);					
+				
+			}
+			
+		}
+		
+		
+
+//		IntExpr x = ctx.mkIntConst("x");
+//		IntExpr y = ctx.mkIntConst("y");
+//		IntExpr th = ctx.mkInt(500); 
+//		IntExpr th1 = ctx.mkInt(2);
+//		IntExpr th2 = ctx.mkInt(20);
+//		BoolExpr t1 = ctx.mkEq(ctx.mkAdd(x,y), th);
+//		BoolExpr t2 = ctx.mkEq(ctx.mkAdd(x,ctx.mkMul(th1, y)), th2);
+//		solver.add(t1);
+//		solver.add(t2);
+//		solver.check();
+//		final Model model = solver.getModel();
+//		System.out.println(model.getConstInterp(x));
+//		System.out.println(model.getConstInterp(y));
+		ctx.close();
+	}
+	
+	public static void testSat2() {
 		// ArrayList<ArrayList<Map<Integer, Integer> > > integerArithDnf 
 		// [{0=0}, {1=0}, {0=2}, {1=1}, {0=1}, {0=0, 1=0, 2=2}, {2=3}]
 		//ArrayList<Map<Integer, Integer> >  integerArithConj = new ArrayList<Map<Integer, Integer> > ();
