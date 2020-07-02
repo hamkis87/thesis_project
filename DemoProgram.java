@@ -336,7 +336,11 @@ public class DemoProgram {
 		final Solver solver = ctx.mkSimpleSolver();
 		// ArrayList<ArrayList<Map<Integer, Integer> > > integerArithDnf 
 		// [{0=0}, {0=2, 1=1, 2=1}, {1=3}, {1=0, 2=2}]
-		ArrayList<Map<Integer, Integer> >  integerArithConj = new ArrayList<Map<Integer, Integer> > ();
+		// this represents the following:
+		// (len(var0) = 0) and (len(var1) = 2i or len(var1) = 1 + i or len(var1) = 2 + i) and
+		// (len(var2) = 1 + 3i) and (len(var3) = 1 or len(var3) = 2 + 2i)
+		// note that i above is not essentially the same in each equation
+		ArrayList<Map<Integer, Integer> >  lassoList = new ArrayList<Map<Integer, Integer> > ();
 		Map<Integer, Integer> lasso1 = new HashMap<Integer, Integer> ();
 		Map<Integer, Integer> lasso2 = new HashMap<Integer, Integer> ();
 		Map<Integer, Integer> lasso3 = new HashMap<Integer, Integer> ();
@@ -353,35 +357,39 @@ public class DemoProgram {
 		lasso4.put(1, 0);
 		lasso4.put(2, 2);
 		
-		integerArithConj.add(lasso1);
-		integerArithConj.add(lasso2);
-		integerArithConj.add(lasso3);
-		integerArithConj.add(lasso4);
-		System.out.println(integerArithConj);
+		lassoList.add(lasso1);
+		lassoList.add(lasso2);
+		lassoList.add(lasso3);
+		lassoList.add(lasso4);
+		System.out.println("lassoList = " + lassoList);
 		ArrayList<BoolExpr> linearConstraints = new ArrayList<BoolExpr> ();
 		// the length constraint for each var is : len(var) = k + v*i
 		ArrayList<IntExpr> vars = new ArrayList<IntExpr> ();
-		for (int i = 0; i < integerArithConj.size(); i++) {
+		for (int i = 0; i < lassoList.size(); i++) {
 			String s = "var" + Integer.toString(i);
 			vars.add(ctx.mkIntConst(s));
+			// to do: add that each var >= 0
 		}
-		System.out.println(vars);
+		System.out.println("variables: " + vars);
+		
+		// Example: varKIMaps[0] = {0=i_0_0, 1=i_0_1, 2=i_0_2}
+		// means that len(var_0) = 0+ v0*i_0_0 or len(var_0) = 1+ v1*i_0_1 or 
+		//            len(var_0) = 2+ v2*i_0_2 where lasso(var_0) = {0=v0, 1=v1, 2=v2}
 		ArrayList<Map<Integer, IntExpr> >  varKIMaps = new ArrayList<Map<Integer, IntExpr> > ();
-		for (int i = 0; i < integerArithConj.size(); i++) {
-			Map<Integer, Integer> lasso = integerArithConj.get(i);
-			//System.out.println(lasso);
+		for (int i = 0; i < lassoList.size(); i++) {
+			Map<Integer, Integer> lasso = lassoList.get(i);
 			Map<Integer, IntExpr> varKIMap = new HashMap<Integer, IntExpr> ();
 			for (int k: lasso.keySet()) {
-				String s = "var_" + Integer.toString(i) + "_" + Integer.toString(k);
+				String s = "i_" + Integer.toString(i) + "_" + Integer.toString(k);
 				varKIMap.put(k, ctx.mkIntConst(s));												
 			}
 			varKIMaps.add(i, varKIMap);
 		}
-		System.out.println(varKIMaps);
-		// to do: add the constraint that varioables are ge to 0
-		for (int i = 0; i < integerArithConj.size(); i++) {
+		System.out.println("i variables: " + varKIMaps);
+		// to do: add the constraint that variables are >= to 0
+		for (int i = 0; i < lassoList.size(); i++) {
 			IntExpr var = vars.get(i);
-			Map<Integer, Integer> lasso = integerArithConj.get(i);
+			Map<Integer, Integer> lasso = lassoList.get(i);
 			System.out.println(lasso);
 			Map<Integer, IntExpr> varKIMap = varKIMaps.get(i);
 			Set<Integer> varKs = lasso.keySet();
@@ -391,6 +399,7 @@ public class DemoProgram {
 					IntExpr vi_term = (IntExpr) ctx.mkMul(ctx.mkInt(lasso.get(k)), varKIMap.get(k));
 					BoolExpr linearConstraint = ctx.mkEq(var, ctx.mkAdd(k_term, vi_term));	
 					linearConstraints.add(i, linearConstraint);
+					solver.add(linearConstraint);
 					System.out.println(linearConstraint);					
 				}			
 			}
@@ -402,12 +411,12 @@ public class DemoProgram {
 					BoolExpr linearConstraintDisj = ctx.mkEq(var, ctx.mkAdd(k_term, vi_term));
 					linearConstraint = ctx.mkOr(linearConstraint, linearConstraintDisj);
 				}
+				linearConstraints.add(i, linearConstraint);	
+				solver.add(linearConstraint);
 				System.out.println(linearConstraint);
-				linearConstraints.add(i, linearConstraint);					
-				
 			}
-			
 		}
+		//System.out.println("linearConstraints: " + linearConstraints);
 		
 		
 
