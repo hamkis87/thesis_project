@@ -367,8 +367,11 @@ public class DemoProgram {
 		ArrayList<IntExpr> vars = new ArrayList<IntExpr> ();
 		for (int i = 0; i < lassoList.size(); i++) {
 			String s = "var" + Integer.toString(i);
-			vars.add(ctx.mkIntConst(s));
-			// to do: add that each var >= 0
+			IntExpr var = ctx.mkIntConst(s); 
+			vars.add(var);
+			// each var >= 0
+			BoolExpr nonNegativeVar = ctx.mkGe(var, ctx.mkInt(0));
+			solver.add(nonNegativeVar);
 		}
 		System.out.println("variables: " + vars);
 		
@@ -381,11 +384,14 @@ public class DemoProgram {
 			Map<Integer, IntExpr> varKIMap = new HashMap<Integer, IntExpr> ();
 			for (int k: lasso.keySet()) {
 				String s = "i_" + Integer.toString(i) + "_" + Integer.toString(k);
-				varKIMap.put(k, ctx.mkIntConst(s));												
+				IntExpr iVar = ctx.mkIntConst(s); 
+				varKIMap.put(k, iVar);									
+				BoolExpr nonNegativeI = ctx.mkGe(iVar, ctx.mkInt(0));
+				solver.add(nonNegativeI);
 			}
 			varKIMaps.add(i, varKIMap);
 		}
-		System.out.println("i variables: " + varKIMaps);
+		System.out.println("i_variables: " + varKIMaps);
 		// to do: add the constraint that variables are >= to 0
 		for (int i = 0; i < lassoList.size(); i++) {
 			IntExpr var = vars.get(i);
@@ -416,6 +422,11 @@ public class DemoProgram {
 				System.out.println(linearConstraint);
 			}
 		}
+		Status satStatus = solver.check();
+		Boolean isSat = satStatus.equals(Status.SATISFIABLE);
+		System.out.println("Constraints are SAT: " + isSat);
+		final Model model = solver.getModel();
+		System.out.println(model.toString());
 		//System.out.println("linearConstraints: " + linearConstraints);
 		
 		
