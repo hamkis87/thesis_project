@@ -7,11 +7,15 @@ import com.microsoft.z3.*;
  * @author hamid
  *
  */
+/**
+ * @author hamid
+ *
+ */
 public class DemoProgram {
 
 	public static void main(String[] args) {
-		//readUserInput();
-		testSat();
+		readUserInput();
+		//testSat();
 	}
 	
 	public static void readUserInput() {
@@ -25,16 +29,16 @@ public class DemoProgram {
 		//			for example if the disjunct is:
 		//					
 		//
-		String lhsOfStrCons1 = "ab";
-		String lhsOfStrCons2 = "fa";
-		String lhsOfStrCons3 = "gbe";
-		String lhsOfStrCons4 = "c";
-		String lhsOfStrCons5 = "bd";
+		String lhsOfStrCons1 = "abc";
+		String lhsOfStrCons2 = "b";
+		String lhsOfStrCons3 = "d";
+		String lhsOfStrCons4 = "cbe";
+		String lhsOfStrCons5 = "e";
 		RegExp r1 = new RegExp("(w|z)+");
-		RegExp r2 = new RegExp("(xy)*");
-		RegExp r3 = new RegExp("(w|z)+");
-		RegExp r4 = new RegExp("(wz)*|x");
-		RegExp r5 = new RegExp("(xyz)*");
+		RegExp r2 = new RegExp("(w|z)");
+		RegExp r3 = new RegExp("w+");
+		RegExp r4 = new RegExp("(w|z)*");
+		RegExp r5 = new RegExp("z+");
 		Automaton rhsOfStrCons1 = r1.toAutomaton();
 		Automaton rhsOfStrCons2 = r2.toAutomaton();
 		Automaton rhsOfStrCons3 = r3.toAutomaton();
@@ -59,11 +63,11 @@ public class DemoProgram {
 		ArrayList<ArrayList<Automaton> > simpleMembershipDnf = 
 				getsimpleMembershipDnf(simpleMembership);
 		String lhsOfStrConsCombined = combineLhsOfStrCons(lhsOfStrCons);
-		System.out.println(lhsOfStrConsCombined);
+		System.out.println("lhsOfStrConsCombined: " + lhsOfStrConsCombined);
 		ArrayList<ArrayList<Integer> > equalVarIds = getEqualVarIds(lhsOfStrConsCombined);
 		System.out.println(equalVarIds);
 		String vars = getVars(lhsOfStrConsCombined, equalVarIds); 
-		System.out.println(vars);
+		System.out.println("vars: " + vars);
 		ArrayList<ArrayList<Automaton> > simpleMembershipDnfIntersected = 
 				intersectSimpleMembershipDnf(simpleMembershipDnf, equalVarIds);
 		ArrayList<ArrayList<Automaton> > oneSymbolAutomataDnf = 
@@ -71,10 +75,46 @@ public class DemoProgram {
 		//System.out.println(simpleMembershipDnfIntersected.size() == oneSymbolAutomataDnf.size());
 		ArrayList<ArrayList<Map<Integer, Integer> > > integerArithDnf = 
 				getIntegerArithDnf(oneSymbolAutomataDnf);
-		System.out.println(integerArithDnf);
+		ArrayList<ArrayList<Map<Integer, Integer> > > refinedIntegerArithDnf = 
+				refineIntegerArithDnf(integerArithDnf);
+		System.out.println(refinedIntegerArithDnf);
 		
 	}
 	
+	private static ArrayList<ArrayList<Map<Integer, Integer> > > 
+	                refineIntegerArithDnf(ArrayList<ArrayList<Map<Integer, Integer>>> integerArithDnf) {
+		// TODO Auto-generated method stub
+		boolean isValid = true;
+		int countImpossibleSols = 0;
+		ArrayList<ArrayList<Map<Integer, Integer>>> result = new ArrayList<ArrayList<Map<Integer, Integer> > > ();
+		for (int i=0; i < integerArithDnf.size(); i++) {
+			ArrayList<Map<Integer, Integer> > possibleSol = integerArithDnf.get(i);
+			boolean isPossibleSol = true;
+			for (int j = 0; j < possibleSol.size(); j++) {
+				Map<Integer, Integer> lasso = possibleSol.get(j);
+				if (lasso.containsKey(-1)) {
+					if (lasso.keySet().size() > 1) {
+						System.out.println("Error in lasso");
+						isValid = false;
+					}
+					countImpossibleSols++;
+					isPossibleSol = false;
+					break;
+				}
+			}
+			if (isPossibleSol) {
+				result.add(possibleSol);				
+			}
+		}
+		//int x = integerArithDnf.size() - result.size();
+		//boolean check = x == countImpossibleSols;
+		//System.out.println("Check refineIntegerArithDnf is correct: " + check);
+		//System.out.println("integerArithDnf size = " + integerArithDnf.size());
+		//System.out.println("countImpossibleSols = " + countImpossibleSols);
+		//System.out.println("refineIntegerArithDnf output: " + result);
+	    return result;
+	}
+
 	public static ArrayList<ArrayList<Map<Integer, Integer> > > getIntegerArithDnf
 	                        (ArrayList<ArrayList<Automaton> > oneSymbolAutomataDnf) {
 		ArrayList<ArrayList<Map<Integer, Integer> > > integerArithDnf = 
@@ -84,7 +124,7 @@ public class DemoProgram {
 			ArrayList<Map<Integer, Integer> > integerArithConjunctions = new ArrayList<Map<Integer, Integer> > ();
 			for (int j = 0; j < automataConjunctions.size(); j++) {
 				Map<Integer, Integer> automataAsIntegerArith = lassoAsLinearConstraint(automataConjunctions.get(j));
-				System.out.println("Var " + j + " as linear: " + automataAsIntegerArith);
+				//System.out.println("Var " + j + " as linear: " + automataAsIntegerArith);
 				integerArithConjunctions.add(automataAsIntegerArith);
 			}
 			integerArithDnf.add(integerArithConjunctions);									
@@ -175,6 +215,12 @@ public class DemoProgram {
 		}
 		return lhsOfStrConsCombined;
 	}
+	
+	
+	/**
+	 * @param simpleMembership 
+	 * @return
+	 */
 	public static ArrayList<ArrayList<Automaton> > 
 				  getsimpleMembershipDnf(Map<Integer, ArrayList<ArrayList<Automaton> > > simpleMembership) {
 		ArrayList<ArrayList<Automaton> > result = simpleMembership.get(0);
