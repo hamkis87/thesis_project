@@ -29,9 +29,9 @@ public class DemoProgram {
 		//			for example if the disjunct is:
 		//					
 		//
-		String lhsOfStrCons1 = "abc";
-		String lhsOfStrCons2 = "b";
-		String lhsOfStrCons3 = "d";
+		String lhsOfStrCons1 = "abcd";
+		String lhsOfStrCons2 = "be";
+		String lhsOfStrCons3 = "da";
 		String lhsOfStrCons4 = "cbe";
 		String lhsOfStrCons5 = "e";
 		RegExp r1 = new RegExp("(w|z)+");
@@ -58,6 +58,18 @@ public class DemoProgram {
 		rhsOfStrCons.add(3, rhsOfStrCons4);
 		rhsOfStrCons.add(4, rhsOfStrCons5);	
 		//System.out.println("rhsOfMembershipCons: " + rhsOfMembershipCons);
+		ArrayList<ArrayList<Map<Integer, Integer> > > refinedIntegerArithDnf =
+				new ArrayList<ArrayList<Map<Integer, Integer> > > ();
+		ArrayList<Character> variables = new ArrayList<Character> ();
+		processMembershipConstraints(variables, refinedIntegerArithDnf, lhsOfStrCons, rhsOfStrCons);
+		System.out.println("variables: " + variables);
+		System.out.println("refinedIntegerArithDnf: " + refinedIntegerArithDnf);
+	}
+	
+	private static void processMembershipConstraints(ArrayList<Character> variables,
+			ArrayList<ArrayList<Map<Integer, Integer>>> refinedIntegerArithDnf, List<String> lhsOfStrCons,
+			List<Automaton> rhsOfStrCons) {
+		// TODO Auto-generated method stub
 		Map<Integer, ArrayList<ArrayList<Automaton> > > simpleMembership = 
 				getsimpleMembership(lhsOfStrCons,rhsOfStrCons);
 		ArrayList<ArrayList<Automaton> > simpleMembershipDnf = 
@@ -65,28 +77,27 @@ public class DemoProgram {
 		String lhsOfStrConsCombined = combineLhsOfStrCons(lhsOfStrCons);
 		System.out.println("lhsOfStrConsCombined: " + lhsOfStrConsCombined);
 		ArrayList<ArrayList<Integer> > equalVarIds = getEqualVarIds(lhsOfStrConsCombined);
-		System.out.println(equalVarIds);
-		String vars = getVars(lhsOfStrConsCombined, equalVarIds); 
-		System.out.println("vars: " + vars);
+		//System.out.println(equalVarIds);
+		String vars = getVars(lhsOfStrConsCombined, equalVarIds);
+		for (int i = 0; i < vars.length(); i++) {
+			variables.add(i, vars.charAt(i));						
+		}
+		//System.out.println("vars: " + vars);
 		ArrayList<ArrayList<Automaton> > simpleMembershipDnfIntersected = 
 				intersectSimpleMembershipDnf(simpleMembershipDnf, equalVarIds);
 		ArrayList<ArrayList<Automaton> > oneSymbolAutomataDnf = 
 				getOneSymbolAutomataDnf(simpleMembershipDnfIntersected);
 		//System.out.println(simpleMembershipDnfIntersected.size() == oneSymbolAutomataDnf.size());
-		ArrayList<ArrayList<Map<Integer, Integer> > > integerArithDnf = 
+		ArrayList<ArrayList<Map<Integer, Integer> > > unRefinedintegerArithDnf = 
 				getIntegerArithDnf(oneSymbolAutomataDnf);
-		ArrayList<ArrayList<Map<Integer, Integer> > > refinedIntegerArithDnf = 
-				refineIntegerArithDnf(integerArithDnf);
-		System.out.println(refinedIntegerArithDnf);
-		
+		refineIntegerArithDnf(unRefinedintegerArithDnf, refinedIntegerArithDnf);
 	}
-	
-	private static ArrayList<ArrayList<Map<Integer, Integer> > > 
-	                refineIntegerArithDnf(ArrayList<ArrayList<Map<Integer, Integer>>> integerArithDnf) {
-		// TODO Auto-generated method stub
+
+	private static void refineIntegerArithDnf(ArrayList<ArrayList<Map<Integer, Integer>>> integerArithDnf,
+			ArrayList<ArrayList<Map<Integer, Integer> > > refinedIntegerArithDnf) {
 		boolean isValid = true;
 		int countImpossibleSols = 0;
-		ArrayList<ArrayList<Map<Integer, Integer>>> result = new ArrayList<ArrayList<Map<Integer, Integer> > > ();
+		//ArrayList<ArrayList<Map<Integer, Integer>>> result = new ArrayList<ArrayList<Map<Integer, Integer> > > ();
 		for (int i=0; i < integerArithDnf.size(); i++) {
 			ArrayList<Map<Integer, Integer> > possibleSol = integerArithDnf.get(i);
 			boolean isPossibleSol = true;
@@ -103,7 +114,7 @@ public class DemoProgram {
 				}
 			}
 			if (isPossibleSol) {
-				result.add(possibleSol);				
+				refinedIntegerArithDnf.add(possibleSol);				
 			}
 		}
 		//int x = integerArithDnf.size() - result.size();
@@ -111,8 +122,7 @@ public class DemoProgram {
 		//System.out.println("Check refineIntegerArithDnf is correct: " + check);
 		//System.out.println("integerArithDnf size = " + integerArithDnf.size());
 		//System.out.println("countImpossibleSols = " + countImpossibleSols);
-		//System.out.println("refineIntegerArithDnf output: " + result);
-	    return result;
+		//System.out.println("refineIntegerArithDnf output: " + result);		
 	}
 
 	public static ArrayList<ArrayList<Map<Integer, Integer> > > getIntegerArithDnf
