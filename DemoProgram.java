@@ -29,56 +29,83 @@ public class DemoProgram {
 		//			for example if the disjunct is:
 		//					
 		//
-		String lhsOfStrCons1 = "abcd";
-		String lhsOfStrCons2 = "be";
-		String lhsOfStrCons3 = "da";
-		String lhsOfStrCons4 = "cbe";
-		String lhsOfStrCons5 = "e";
+		String lhsOfMemCons1 = "abcd";
+		String lhsOfMemCons2 = "be";
+		String lhsOfMemCons3 = "da";
+		String lhsOfMemCons4 = "cbe";
+		String lhsOfMemCons5 = "e";
 		RegExp r1 = new RegExp("(w|z)+");
 		RegExp r2 = new RegExp("(w|z)");
 		RegExp r3 = new RegExp("w+");
 		RegExp r4 = new RegExp("(w|z)*");
 		RegExp r5 = new RegExp("z+");
-		Automaton rhsOfStrCons1 = r1.toAutomaton();
-		Automaton rhsOfStrCons2 = r2.toAutomaton();
-		Automaton rhsOfStrCons3 = r3.toAutomaton();
-		Automaton rhsOfStrCons4 = r4.toAutomaton();
-		Automaton rhsOfStrCons5 = r5.toAutomaton();
-		List<String> lhsOfStrCons = new ArrayList<String> ();
-		List<Automaton> rhsOfStrCons = new ArrayList<Automaton> ();
-		lhsOfStrCons.add(0, lhsOfStrCons1);
-		lhsOfStrCons.add(1, lhsOfStrCons2);
-		lhsOfStrCons.add(2, lhsOfStrCons3);
-		lhsOfStrCons.add(3, lhsOfStrCons4);
-		lhsOfStrCons.add(4, lhsOfStrCons5);
+		Automaton rhsOfMemCons1 = r1.toAutomaton();
+		Automaton rhsOfMemCons2 = r2.toAutomaton();
+		Automaton rhsOfMemCons3 = r3.toAutomaton();
+		Automaton rhsOfMemCons4 = r4.toAutomaton();
+		Automaton rhsOfMemCons5 = r5.toAutomaton();
+		List<String> lhsOfMemCons = new ArrayList<String> ();
+		List<Automaton> rhsOfMemCons = new ArrayList<Automaton> ();
+		lhsOfMemCons.add(0, lhsOfMemCons1);
+		lhsOfMemCons.add(1, lhsOfMemCons2);
+		lhsOfMemCons.add(2, lhsOfMemCons3);
+		lhsOfMemCons.add(3, lhsOfMemCons4);
+		lhsOfMemCons.add(4, lhsOfMemCons5);
 		//System.out.println("lhsOfMembershipCons: " + lhsOfMembershipCons);
-		rhsOfStrCons.add(0, rhsOfStrCons1);
-		rhsOfStrCons.add(1, rhsOfStrCons2);
-		rhsOfStrCons.add(2, rhsOfStrCons3);
-		rhsOfStrCons.add(3, rhsOfStrCons4);
-		rhsOfStrCons.add(4, rhsOfStrCons5);	
+		rhsOfMemCons.add(0, rhsOfMemCons1);
+		rhsOfMemCons.add(1, rhsOfMemCons2);
+		rhsOfMemCons.add(2, rhsOfMemCons3);
+		rhsOfMemCons.add(3, rhsOfMemCons4);
+		rhsOfMemCons.add(4, rhsOfMemCons5);	
 		//System.out.println("rhsOfMembershipCons: " + rhsOfMembershipCons);
+		
+		// length constraint is expressed as follows: for (2y - 4x + w >= 2): 
+		//    lhsOfLenCon = {'x'=-4, 'y'=2, 'w'=1}
+		//    rhsOfLenCon = 2
+		//    relLhs2RhsOfLenCon = IntegerRelation.GREATEREQUAL
+		List<Map<Character, Integer>> lhsOfLenCons = new ArrayList<Map<Character, Integer>> ();
+		List<Integer> rhsOfLenCons = new ArrayList<Integer> ();
+		List<IntegerRelation> relLhs2RhsOfLenCons = new ArrayList<IntegerRelation> ();
+		getLengthConstraints(lhsOfLenCons, relLhs2RhsOfLenCons, rhsOfLenCons);
+		
+		
 		ArrayList<ArrayList<Map<Integer, Integer> > > refinedIntegerArithDnf =
 				new ArrayList<ArrayList<Map<Integer, Integer> > > ();
 		ArrayList<Character> variables = new ArrayList<Character> ();
-		processMembershipConstraints(variables, refinedIntegerArithDnf, lhsOfStrCons, rhsOfStrCons);
+		processMembershipConstraints(variables, refinedIntegerArithDnf, lhsOfMemCons, rhsOfMemCons);
 		System.out.println("variables: " + variables);
 		System.out.println("refinedIntegerArithDnf: " + refinedIntegerArithDnf);
 	}
 	
+	private static void getLengthConstraints(List<Map<Character, Integer>> lhsOfLenCons,
+			List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons) {
+		// TODO Auto-generated method stub
+		Map<Character, Integer> lhsOfLenCons1 = new HashMap<Character, Integer> ();
+		int rhsOfLenCons1;
+		IntegerRelation relLhs2RhsOfLenCons1;
+		lhsOfLenCons1.put('b', 2);
+		lhsOfLenCons1.put('a', -4);
+		rhsOfLenCons1 = 5;
+		relLhs2RhsOfLenCons1 = IntegerRelation.GREATER;
+		
+		Map<Character, Integer> lhsOfLenCons2 = new HashMap<Character, Integer> ();
+		
+		
+	}
+
 	private static void processMembershipConstraints(ArrayList<Character> variables,
-			ArrayList<ArrayList<Map<Integer, Integer>>> refinedIntegerArithDnf, List<String> lhsOfStrCons,
-			List<Automaton> rhsOfStrCons) {
+			ArrayList<ArrayList<Map<Integer, Integer>>> refinedIntegerArithDnf, List<String> lhsOfMemCons,
+			List<Automaton> rhsOfMemCons) {
 		// TODO Auto-generated method stub
 		Map<Integer, ArrayList<ArrayList<Automaton> > > simpleMembership = 
-				getsimpleMembership(lhsOfStrCons,rhsOfStrCons);
+				getsimpleMembership(lhsOfMemCons,rhsOfMemCons);
 		ArrayList<ArrayList<Automaton> > simpleMembershipDnf = 
 				getsimpleMembershipDnf(simpleMembership);
-		String lhsOfStrConsCombined = combineLhsOfStrCons(lhsOfStrCons);
-		System.out.println("lhsOfStrConsCombined: " + lhsOfStrConsCombined);
-		ArrayList<ArrayList<Integer> > equalVarIds = getEqualVarIds(lhsOfStrConsCombined);
+		String lhsOfMemConsCombined = combinelhsOfMemCons(lhsOfMemCons);
+		System.out.println("lhsOfMemConsCombined: " + lhsOfMemConsCombined);
+		ArrayList<ArrayList<Integer> > equalVarIds = getEqualVarIds(lhsOfMemConsCombined);
 		//System.out.println(equalVarIds);
-		String vars = getVars(lhsOfStrConsCombined, equalVarIds);
+		String vars = getVars(lhsOfMemConsCombined, equalVarIds);
 		for (int i = 0; i < vars.length(); i++) {
 			variables.add(i, vars.charAt(i));						
 		}
@@ -175,9 +202,9 @@ public class DemoProgram {
 		return simpleMembershipDnfIntersected;
 	}
 	
-	public static String getVars(String lhsOfStrConsCombined, ArrayList<ArrayList<Integer> > equalVarIds) {
+	public static String getVars(String lhsOfMemConsCombined, ArrayList<ArrayList<Integer> > equalVarIds) {
 		String vars = "";
-		for (int i = 0; i < lhsOfStrConsCombined.length(); i++) {
+		for (int i = 0; i < lhsOfMemConsCombined.length(); i++) {
 			boolean hasBeenAdded = false;
 			for (int j = 0; j < equalVarIds.size(); j++) {
 				if (equalVarIds.get(j).indexOf(i) > 0) {
@@ -186,24 +213,24 @@ public class DemoProgram {
 				}				
 			}
 			if (!hasBeenAdded) {
-				vars = vars + lhsOfStrConsCombined.charAt(i);								
+				vars = vars + lhsOfMemConsCombined.charAt(i);								
 			}
 		}
 		return vars;
 	}
 	
-	public static ArrayList<ArrayList<Integer> > getEqualVarIds(String lhsOfStrConsCombined) {
+	public static ArrayList<ArrayList<Integer> > getEqualVarIds(String lhsOfMemConsCombined) {
 		ArrayList<ArrayList<Integer> > equalVarIds = new ArrayList<ArrayList<Integer> > ();
 		List<Boolean> idHasBeenAdded = new ArrayList<Boolean> ();
-		for (int i = 0; i < lhsOfStrConsCombined.length(); i++) {
+		for (int i = 0; i < lhsOfMemConsCombined.length(); i++) {
 			idHasBeenAdded.add(false);			
 		}
-		for (int i = 0; i < lhsOfStrConsCombined.length() - 1; i++) {
+		for (int i = 0; i < lhsOfMemConsCombined.length() - 1; i++) {
 			if (!idHasBeenAdded.get(i)) {
 				int equalVarId = i;
 				ArrayList<Integer> equalVarIdsGroup = new ArrayList<Integer> ();
-				for (int j = i + 1; j < lhsOfStrConsCombined.length(); j++) {
-					if (lhsOfStrConsCombined.charAt(equalVarId) == lhsOfStrConsCombined.charAt(j)) {
+				for (int j = i + 1; j < lhsOfMemConsCombined.length(); j++) {
+					if (lhsOfMemConsCombined.charAt(equalVarId) == lhsOfMemConsCombined.charAt(j)) {
 						equalVarIdsGroup.add(equalVarId);
 						idHasBeenAdded.set(equalVarId, true);						
 						equalVarId = j;
@@ -218,12 +245,12 @@ public class DemoProgram {
 		return equalVarIds;
 	}
 	
-	public static String combineLhsOfStrCons(List<String> lhsOfStrCons) {
-		String lhsOfStrConsCombined = "";
-		for (String s: lhsOfStrCons) {
-			lhsOfStrConsCombined = lhsOfStrConsCombined.concat(s);			
+	public static String combinelhsOfMemCons(List<String> lhsOfMemCons) {
+		String lhsOfMemConsCombined = "";
+		for (String s: lhsOfMemCons) {
+			lhsOfMemConsCombined = lhsOfMemConsCombined.concat(s);			
 		}
-		return lhsOfStrConsCombined;
+		return lhsOfMemConsCombined;
 	}
 	
 	
@@ -243,12 +270,12 @@ public class DemoProgram {
 	}
 	
 	public static HashMap<Integer, ArrayList<ArrayList<Automaton> > > 
-	              getsimpleMembership(List<String> lhsOfStrCons, List<Automaton> rhsOfStrCons) {
+	              getsimpleMembership(List<String> lhsOfMemCons, List<Automaton> rhsOfMemCons) {
 		HashMap<Integer, ArrayList<ArrayList<Automaton> > > simpleMembership = 
 				new HashMap<Integer, ArrayList<ArrayList<Automaton> > >();
-		for (int i = 0; i < lhsOfStrCons.size(); i++) {
-			int noOfVars = lhsOfStrCons.get(i).length();
-			Automaton automaton = rhsOfStrCons.get(i);
+		for (int i = 0; i < lhsOfMemCons.size(); i++) {
+			int noOfVars = lhsOfMemCons.get(i).length();
+			Automaton automaton = rhsOfMemCons.get(i);
 			ArrayList<ArrayList<Automaton> > simpleDnf = new ArrayList<ArrayList<Automaton> > ();
 			if (noOfVars > 1) { // the case for not simple membership 
 				simpleDnf = membership2Simple(noOfVars, automaton);				
