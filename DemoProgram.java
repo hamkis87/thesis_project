@@ -91,7 +91,6 @@ public class DemoProgram {
 		System.out.println("relLhs2RhsOfEqDeqCons = " + relLhs2RhsOfEqDeqCons);
 		/***********************************************************************************/
 		
-		
 		ArrayList<ArrayList<Map<Integer, Integer> > > refinedIntegerArithDnf =
 				new ArrayList<ArrayList<Map<Integer, Integer> > > ();
 		ArrayList<Character> variables = new ArrayList<Character> ();
@@ -101,8 +100,63 @@ public class DemoProgram {
 		
 		final Context context = new Context();
 		final Solver solver = context.mkSimpleSolver();
+		Map<Character, IntExpr> lengthVariables = makeLengthVariables(context, variables);
+		System.out.println("lengthVariables = " + lengthVariables);
+		addLengthConstraintsToSolver(lhsOfLenCons, relLhs2RhsOfLenCons, rhsOfLenCons, 
+				                     lengthVariables, context, solver);
+		System.out.println("solver after adding length constraints= " + solver.toString());
 	}
 	
+	private static void addLengthConstraintsToSolver(List<Map<Character, Integer>> lhsOfLenCons,
+			List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons,
+			Map<Character, IntExpr> lengthVariables, Context context, Solver solver) {
+		// TODO Auto-generated method stub
+		for (int i = 0; i < lhsOfLenCons.size(); i++) {
+			Map<Character, Integer> lhsOfLenConsI = lhsOfLenCons.get(i);
+			IntegerRelation relLhs2RhsOfLenConsI = relLhs2RhsOfLenCons.get(i);
+			int rhsOfLenConsI = rhsOfLenCons.get(i);
+			IntExpr lhsI = context.mkInt(0);
+			IntExpr rhsI = context.mkInt(rhsOfLenConsI);
+			BoolExpr b = context.mkBool(true);
+			for (Character c: lhsOfLenConsI.keySet()) {
+				IntExpr x = lengthVariables.get(c);
+				IntExpr a = context.mkInt(lhsOfLenConsI.get(c));
+				lhsI = (IntExpr) context.mkAdd(context.mkMul(x,a), lhsI);
+			}
+			switch (relLhs2RhsOfLenConsI) {
+			case EQUAL:
+				b = context.mkEq(lhsI, rhsI);
+				break;
+			case NOTEQUAL:
+				b = context.mkNot(context.mkEq(lhsI, rhsI));
+				break;
+			case GREATER:
+				b = context.mkGt(lhsI, rhsI);
+				break;
+			case GREATEREQUAL:
+				b = context.mkGe(lhsI, rhsI);
+				break;
+			case LESS:
+				b = context.mkLt(lhsI, rhsI);
+				break;
+			case LESSEQUAL:
+				b = context.mkLe(lhsI, rhsI);
+				break;	
+			}
+			solver.add(b);
+		}
+	}
+
+	private static Map<Character, IntExpr> makeLengthVariables(Context context, ArrayList<Character> variables) {
+		// TODO Auto-generated method stub
+		Map<Character, IntExpr> lengthVariables = new HashMap<Character, IntExpr> ();
+		for (Character c: variables) {
+			IntExpr x = context.mkIntConst(Character.toString(c));
+			lengthVariables.put(c, x);
+		}
+		return lengthVariables;
+	}
+
 	private static void getEqDeqConstraints(List<String> lhsEqDeqCons, List<EqualityRelation> relLhs2RhsOfEqDeqCons,
 			List<String> rhsEqDeqCons) {
 		// TODO Auto-generated method stub
