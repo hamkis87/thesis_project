@@ -59,14 +59,37 @@ public class DemoProgram {
 		rhsOfMemCons.add(4, rhsOfMemCons5);	
 		//System.out.println("rhsOfMembershipCons: " + rhsOfMembershipCons);
 		
-		// length constraint is expressed as follows: for (2y - 4x + w >= 2): 
-		//    lhsOfLenCon = {'x'=-4, 'y'=2, 'w'=1}
-		//    rhsOfLenCon = 2
-		//    relLhs2RhsOfLenCon = IntegerRelation.GREATEREQUAL
+		/******************************************************************************
+		 * the length constraint (2y - 4x + w >= 2) is expressed as follows: 
+		 *      lhsOfLenCon = {'x'=-4, 'y'=2, 'w'=1}
+		 *      rhsOfLenCon = 2
+		 *      relLhs2RhsOfLenCon = IntegerRelation.GREATEREQUAL
+		 ******************************************************************************      
+		 */   
 		List<Map<Character, Integer>> lhsOfLenCons = new ArrayList<Map<Character, Integer>> ();
 		List<Integer> rhsOfLenCons = new ArrayList<Integer> ();
 		List<IntegerRelation> relLhs2RhsOfLenCons = new ArrayList<IntegerRelation> ();
 		getLengthConstraints(lhsOfLenCons, relLhs2RhsOfLenCons, rhsOfLenCons);
+		System.out.println("lhsOfLenCons = " + lhsOfLenCons);
+		System.out.println("rhsOfLenCons = " + rhsOfLenCons);
+		System.out.println("relLhs2RhsOfLenCons = " + relLhs2RhsOfLenCons);
+		/***********************************************************************************/
+		
+		/******************************************************************************
+		 * the equality constraint (ab = cd) is expressed as follows: 
+		 *      lhsOfEqDeqCon = "ab"
+		 *      rhsOfEqDeqCon = "cd"
+		 *      relLhs2RhsOfEqDeqCon = EqualityRelation.EQUAL
+		 ******************************************************************************      
+		 */ 
+		List<String> lhsEqDeqCons = new ArrayList<String> ();
+		List<String> rhsEqDeqCons = new ArrayList<String> ();
+		List<EqualityRelation> relLhs2RhsOfEqDeqCons = new ArrayList<EqualityRelation> ();
+		getEqDeqConstraints(lhsEqDeqCons, relLhs2RhsOfEqDeqCons, rhsEqDeqCons);
+		System.out.println("lhsEqDeqCons = " + lhsEqDeqCons);
+		System.out.println("rhsEqDeqCons = " + rhsEqDeqCons);
+		System.out.println("relLhs2RhsOfEqDeqCons = " + relLhs2RhsOfEqDeqCons);
+		/***********************************************************************************/
 		
 		
 		ArrayList<ArrayList<Map<Integer, Integer> > > refinedIntegerArithDnf =
@@ -75,22 +98,65 @@ public class DemoProgram {
 		processMembershipConstraints(variables, refinedIntegerArithDnf, lhsOfMemCons, rhsOfMemCons);
 		System.out.println("variables: " + variables);
 		System.out.println("refinedIntegerArithDnf: " + refinedIntegerArithDnf);
+		
+		final Context context = new Context();
+		final Solver solver = context.mkSimpleSolver();
 	}
 	
+	private static void getEqDeqConstraints(List<String> lhsEqDeqCons, List<EqualityRelation> relLhs2RhsOfEqDeqCons,
+			List<String> rhsEqDeqCons) {
+		// TODO Auto-generated method stub
+		String lhsEqDeqCons1, lhsEqDeqCons2;
+		EqualityRelation relLhs2RhsOfEqDeqCons1, relLhs2RhsOfEqDeqCons2;
+		String rhsEqDeqCons1, rhsEqDeqCons2;
+		lhsEqDeqCons1 = "ac";
+		rhsEqDeqCons1 = "be";
+		relLhs2RhsOfEqDeqCons1 = EqualityRelation.EQUAL;
+		lhsEqDeqCons.add(lhsEqDeqCons1);
+		rhsEqDeqCons.add(rhsEqDeqCons1);
+		relLhs2RhsOfEqDeqCons.add(relLhs2RhsOfEqDeqCons1);
+		
+		lhsEqDeqCons2 = "d";
+		rhsEqDeqCons2 = "b";
+		relLhs2RhsOfEqDeqCons2 = EqualityRelation.EQUAL;
+		lhsEqDeqCons.add(lhsEqDeqCons2);
+		rhsEqDeqCons.add(rhsEqDeqCons2);
+		relLhs2RhsOfEqDeqCons.add(relLhs2RhsOfEqDeqCons2);
+				
+	}
+
 	private static void getLengthConstraints(List<Map<Character, Integer>> lhsOfLenCons,
 			List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons) {
 		// TODO Auto-generated method stub
 		Map<Character, Integer> lhsOfLenCons1 = new HashMap<Character, Integer> ();
-		int rhsOfLenCons1;
-		IntegerRelation relLhs2RhsOfLenCons1;
+		Map<Character, Integer> lhsOfLenCons2 = new HashMap<Character, Integer> ();
+		Map<Character, Integer> lhsOfLenCons3 = new HashMap<Character, Integer> ();
+		int rhsOfLenCons1, rhsOfLenCons2, rhsOfLenCons3;
+		IntegerRelation relLhs2RhsOfLenCons1, relLhs2RhsOfLenCons2, relLhs2RhsOfLenCons3;
+	
 		lhsOfLenCons1.put('b', 2);
 		lhsOfLenCons1.put('a', -4);
 		rhsOfLenCons1 = 5;
 		relLhs2RhsOfLenCons1 = IntegerRelation.GREATER;
+		lhsOfLenCons.add(lhsOfLenCons1);
+		relLhs2RhsOfLenCons.add(relLhs2RhsOfLenCons1);
+		rhsOfLenCons.add(rhsOfLenCons1);
 		
-		Map<Character, Integer> lhsOfLenCons2 = new HashMap<Character, Integer> ();
+		lhsOfLenCons2.put('a', 1);
+		lhsOfLenCons2.put('b', 1);
+		lhsOfLenCons2.put('c', 1);
+		rhsOfLenCons2 = 8;
+		relLhs2RhsOfLenCons2 = IntegerRelation.LESS;
+		lhsOfLenCons.add(lhsOfLenCons2);
+		relLhs2RhsOfLenCons.add(relLhs2RhsOfLenCons2);
+		rhsOfLenCons.add(rhsOfLenCons2);
 		
-		
+		lhsOfLenCons3.put('e', 1);
+		rhsOfLenCons3 = 3;
+		relLhs2RhsOfLenCons3 = IntegerRelation.GREATEREQUAL;
+		lhsOfLenCons.add(lhsOfLenCons3);
+		relLhs2RhsOfLenCons.add(relLhs2RhsOfLenCons3);
+		rhsOfLenCons.add(rhsOfLenCons3);
 	}
 
 	private static void processMembershipConstraints(ArrayList<Character> variables,
