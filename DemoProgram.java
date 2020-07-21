@@ -118,6 +118,8 @@ public class DemoProgram {
 				int nextSatIntegerArithDisjId = getNextSatIntegerArithDisjId(refinedIntegerArithDnf, 
 						                    lengthVariables, variables, context, solver, 
 						                    previousSatIntegerArithDisjId);
+				System.out.println("nextSatIntegerArithDisjId = " + nextSatIntegerArithDisjId);
+				System.out.println("solver after adding membership constraints= " + solver.toString());
 				
 				
 				//solver.pop();
@@ -132,14 +134,28 @@ public class DemoProgram {
 			Map<Character, IntExpr> lengthVariables, ArrayList<Character> variables, Context context, Solver solver,
 			int previousSatIntegerArithDisjId) {
 		// TODO Auto-generated method stub
-		int nextSatIntegerArithDisjId = -1;
-		ArrayList<Map<Integer, Integer> >  lassoList = refinedIntegerArithDnf.get(0);
-		testSat1(lassoList, lengthVariables, variables, context, solver);
-		return nextSatIntegerArithDisjId;
+		// the previous IntegerArithDisj didn't result in SAT constraints, so 
+		// have to examine the next IntegerArithDisj
+		int nextIntegerArithDisjId = previousSatIntegerArithDisjId + 1;
+		while(nextIntegerArithDisjId < refinedIntegerArithDnf.size()) {	 
+			ArrayList<Map<Integer, Integer>> nextIntegerArithDisj = 
+					refinedIntegerArithDnf.get(nextIntegerArithDisjId);
+			solver.push();
+			boolean isSat = testSat(nextIntegerArithDisj, lengthVariables, variables, context, solver);
+			System.out.println("isSat = " + isSat);
+			if (isSat) {
+				return nextIntegerArithDisjId;				
+			}
+			else {
+				solver.pop();
+				nextIntegerArithDisjId = nextIntegerArithDisjId + 1;
+			}
+		}
+		return nextIntegerArithDisjId;
 	}
 
 	
-	public static void testSat1(ArrayList<Map<Integer, Integer> >  lassoList, 
+	public static boolean testSat(ArrayList<Map<Integer, Integer> >  lassoList, 
 			Map<Character, IntExpr> lengthVariables, ArrayList<Character> variables,
 			Context ctx, Solver solver) {
 		// ArrayList<ArrayList<Map<Integer, Integer> > > integerArithDnf 
@@ -148,7 +164,7 @@ public class DemoProgram {
 		// (len(var0) = 0) and (len(var1) = 2i or len(var1) = 1 + i or len(var1) = 2 + i) and
 		// (len(var2) = 1 + 3i) and (len(var3) = 1 or len(var3) = 2 + 2i)
 		// note that i above is not essentially the same in each equation
-		System.out.println("lassoList = " + lassoList);
+		//System.out.println("lassoList = " + lassoList);
 		ArrayList<BoolExpr> linearConstraints = new ArrayList<BoolExpr> ();
 		// the length constraint for each var is : len(var) = k + v*i
 		ArrayList<IntExpr> vars = new ArrayList<IntExpr> ();
@@ -157,8 +173,10 @@ public class DemoProgram {
 			// each var >= 0
 			BoolExpr nonNegativeVar = ctx.mkGe(var, ctx.mkInt(0));
 			solver.add(nonNegativeVar);
+			//System.out.println("nonNegativeVar: " + nonNegativeVar);
+			
 		}
-		System.out.println("variables: " + vars);
+		//System.out.println("variables: " + vars);
 		
 		// Example: varKIMaps[0] = {0=i_0_0, 1=i_0_1, 2=i_0_2}
 		// means that len(var_0) = 0+ v0*i_0_0 or len(var_0) = 1+ v1*i_0_1 or 
@@ -176,12 +194,12 @@ public class DemoProgram {
 			}
 			varKIMaps.add(i, varKIMap);
 		}
-		System.out.println("i_variables: " + varKIMaps);
+		//System.out.println("i_variables: " + varKIMaps);
 		// to do: add the constraint that variables are >= to 0
 		for (int i = 0; i < lassoList.size(); i++) {
 			IntExpr var = lengthVariables.get(variables.get(i));
 			Map<Integer, Integer> lasso = lassoList.get(i);
-			System.out.println(lasso);
+			//System.out.println(lasso);
 			Map<Integer, IntExpr> varKIMap = varKIMaps.get(i);
 			Set<Integer> varKs = lasso.keySet();
 			if (varKs.size() == 1) {
@@ -191,7 +209,7 @@ public class DemoProgram {
 					BoolExpr linearConstraint = ctx.mkEq(var, ctx.mkAdd(k_term, vi_term));	
 					linearConstraints.add(i, linearConstraint);
 					solver.add(linearConstraint);
-					System.out.println(linearConstraint);					
+					//System.out.println(linearConstraint);					
 				}			
 			}
 			else {
@@ -204,16 +222,18 @@ public class DemoProgram {
 				}
 				linearConstraints.add(i, linearConstraint);	
 				solver.add(linearConstraint);
-				System.out.println(linearConstraint);
+				//System.out.println(linearConstraint);
 			}
 		}
-		//Status satStatus = solver.check();
-		//Boolean isSat = satStatus.equals(Status.SATISFIABLE);
+		System.out.println("solver in the testSat function: " + solver);
+		Status satStatus = solver.check();
+		boolean isSat = satStatus.equals(Status.SATISFIABLE);
 		//System.out.println("Constraints are SAT: " + isSat);
 		//final Model model = solver.getModel();
 		//System.out.println(model.toString());
 		//System.out.println("linearConstraints: " + linearConstraints);
 		//ctx.close();
+		return isSat;
 	}
 
 	private static void addLengthConstraintsToSolver(List<Map<Character, Integer>> lhsOfLenCons,
