@@ -30,12 +30,12 @@ public class DemoProgram {
 		//					
 		//
 		String lhsOfMemCons1 = "ab";
-		String lhsOfMemCons2 = "be";
+		String lhsOfMemCons2 = "b";
 		String lhsOfMemCons3 = "db";
 		String lhsOfMemCons4 = "c";
 		String lhsOfMemCons5 = "eac";
 		RegExp r1 = new RegExp("(w|z)+");
-		RegExp r2 = new RegExp("(w|z)*");
+		RegExp r2 = new RegExp("(wz|zw)*");
 		RegExp r3 = new RegExp("w|z");
 		RegExp r4 = new RegExp("(w|z|wz)*");
 		RegExp r5 = new RegExp("z+");
@@ -97,29 +97,35 @@ public class DemoProgram {
 		processMembershipConstraints(variables, refinedIntegerArithDnf, lhsOfMemCons, rhsOfMemCons);
 		System.out.println("variables: " + variables);
 		System.out.println("refinedIntegerArithDnf: " + refinedIntegerArithDnf);
-		
-		final Context context = new Context();
-		final Solver solver = context.mkSimpleSolver();
-		Map<Character, IntExpr> lengthVariables = makeLengthVariables(context, variables);
-		System.out.println("lengthVariables = " + lengthVariables);
-		addLengthConstraintsToSolver(lhsOfLenCons, relLhs2RhsOfLenCons, rhsOfLenCons, 
-				                     lengthVariables, context, solver);
-		System.out.println("solver after adding length constraints= " + solver.toString());
-		//Status st = solver.check();
-		// if length constraints alone are satisfiable, we check the membership constraints
-		if (solver.check().equals(Status.SATISFIABLE)) {
-			System.out.println("Length constraints are SATISFIABLE");
-			// the remaining code should go in here
-			int previousSatIntegerArithDisjId = -1;
-			//solver.push();
-			int nextSatIntegerArithDisjId = getNextSatIntegerArithDisjId(refinedIntegerArithDnf, 
-					                    lengthVariables, variables, context, solver, 
-					                    previousSatIntegerArithDisjId);
-			
-			
-			//solver.pop();
+		if(refinedIntegerArithDnf.size() == 0) {
+			System.out.println("memebership constraints are UNSAT");
+		}
+		else {		
+			final Context context = new Context();
+			final Solver solver = context.mkSimpleSolver();
+			Map<Character, IntExpr> lengthVariables = makeLengthVariables(context, variables);
+			System.out.println("lengthVariables = " + lengthVariables);
+			addLengthConstraintsToSolver(lhsOfLenCons, relLhs2RhsOfLenCons, rhsOfLenCons, 
+					                     lengthVariables, context, solver);
+			System.out.println("solver after adding length constraints= " + solver.toString());
+			//Status st = solver.check();
+			// if length constraints alone are satisfiable, we check the membership constraints
+			if (solver.check().equals(Status.SATISFIABLE)) {
+				System.out.println("Length constraints are SATISFIABLE");
+				// the remaining code should go in here
+				int previousSatIntegerArithDisjId = -1;
+				//solver.push();
+				int nextSatIntegerArithDisjId = getNextSatIntegerArithDisjId(refinedIntegerArithDnf, 
+						                    lengthVariables, variables, context, solver, 
+						                    previousSatIntegerArithDisjId);
+				
+				
+				//solver.pop();
+				
+			}
 			
 		}
+		
 	}
 	
 	private static int getNextSatIntegerArithDisjId(ArrayList<ArrayList<Map<Integer, Integer>>> refinedIntegerArithDnf,
