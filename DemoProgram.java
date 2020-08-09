@@ -124,10 +124,38 @@ public class DemoProgram {
 				
 				//solver.pop();
 				
+				underApproximation(lhsEqDeqCons, relLhs2RhsOfEqDeqCons, rhsEqDeqCons);
+				
 			}
 			
 		}
 		
+	}
+	
+	private static void underApproximation(List<String> lhsEqDeqCons, List<EqualityRelation> relLhs2RhsOfEqDeqCons, List<String> rhsEqDeqCons) {
+		System.out.println("****************************************************************");
+		System.out.println("****************************************************************");
+		System.out.println("The UnderApproximation function");
+		System.out.println("The lhsEqDeqCons: " + lhsEqDeqCons);
+		System.out.println("The relLhs2RhsOfEqDeqCons: " + relLhs2RhsOfEqDeqCons);
+		System.out.println("The rhsEqDeqCons: " + rhsEqDeqCons);
+		// u_variables should be substituted with variable. it is used here for testing the
+		// underApproximation function implementation
+		ArrayList<Character> u_variables = new ArrayList<Character> ();
+		Set<Character> u_variables_set = new HashSet<Character>(); 
+		for (String s: lhsEqDeqCons) {
+			for (int i = 0;i < s.length(); i++)
+				u_variables_set.add(s.charAt(i));
+		}
+		for (String s: rhsEqDeqCons) {
+			for (int i = 0;i < s.length(); i++)
+				u_variables_set.add(s.charAt(i));
+		}
+		for (Character c: u_variables_set) {
+			u_variables.add(c);
+		}
+		
+		System.out.println("u_variables: " + u_variables);
 	}
 	
 	private static int getNextSatIntegerArithDisjId(ArrayList<ArrayList<Map<Integer, Integer>>> refinedIntegerArithDnf,
