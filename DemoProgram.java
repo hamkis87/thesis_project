@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.stream.Collectors;
 
 import dk.brics.automaton.*;
 import com.microsoft.z3.*;
@@ -124,7 +125,7 @@ public class DemoProgram {
 				
 				//solver.pop();
 				
-				underApproximation(lhsEqDeqCons, relLhs2RhsOfEqDeqCons, rhsEqDeqCons);
+				underApproximation(variables, lhsEqDeqCons, relLhs2RhsOfEqDeqCons, rhsEqDeqCons);
 				
 			}
 			
@@ -132,7 +133,7 @@ public class DemoProgram {
 		
 	}
 	
-	private static void underApproximation(List<String> lhsEqDeqCons, List<EqualityRelation> relLhs2RhsOfEqDeqCons, List<String> rhsEqDeqCons) {
+	private static void underApproximation(ArrayList<Character> u_variables, List<String> lhsEqDeqCons, List<EqualityRelation> relLhs2RhsOfEqDeqCons, List<String> rhsEqDeqCons) {
 		System.out.println("****************************************************************");
 		System.out.println("****************************************************************");
 		System.out.println("The UnderApproximation function");
@@ -141,27 +142,21 @@ public class DemoProgram {
 		System.out.println("The rhsEqDeqCons: " + rhsEqDeqCons);
 		// u_variables should be substituted with variable. it is used here for testing the
 		// underApproximation function implementation
-		ArrayList<Character> u_variables = new ArrayList<Character> ();
+		//ArrayList<Character> u_variables = new ArrayList<Character> ();
 		// u_variables[i] is split into a number of variables. This number is u_variables_split_count[i]
 		ArrayList<Integer> u_variables_split_count = new ArrayList<Integer> ();
 		Map<Character, ArrayList<String> > u_variables_split = new HashMap<Character, ArrayList<String> > ();
-		Set<Character> u_variables_set = new HashSet<Character>(); 
-		for (String s: lhsEqDeqCons) {
-			for (int i = 0;i < s.length(); i++)
-				u_variables_set.add(s.charAt(i));
-		}
-		for (String s: rhsEqDeqCons) {
-			for (int i = 0;i < s.length(); i++)
-				u_variables_set.add(s.charAt(i));
-		}
-		for (Character c: u_variables_set) {
-			u_variables.add(c);
-		}
 		
 		System.out.println("u_variables: " + u_variables);
-		for (int i = 0; i < u_variables.size(); i++) {
-			u_variables_split_count.add(i*10 % 7 + 1);						
+		ArrayList<ArrayList<Integer>> lengthPermutations = new ArrayList<ArrayList<Integer>> ();
+		int K_parameter = 5;
+		for (ArrayList<Integer> permutation: getPermutations(K_parameter, u_variables.size())) {
+			List<Integer> lengthPermutation = permutation.stream().map(number -> number + 1). 
+			        collect(Collectors.toList());
+			lengthPermutations.add((ArrayList<Integer>) lengthPermutation);			
 		}
+		System.out.println("lengthPermutations: " + lengthPermutations);
+		u_variables_split_count = lengthPermutations.get(7);
 		System.out.println("u_variables_split_count: " + u_variables_split_count);
 		for (int i = 0; i < u_variables.size(); i++) {
 			Character c = u_variables.get(i);
@@ -173,48 +168,80 @@ public class DemoProgram {
 			u_variables_split.put(c, c_split_into);
 		}
 		System.out.println("u_variables_split: " + u_variables_split);
-		
-		// each variable is expressed by its split variables,
-		// i.e x = u_variables[i] is written as u_variables_split[x]
-		ArrayList<String> splitLhsEqDeqCons1 = new ArrayList<String> ();
-		ArrayList<String> splitRhsEqDeqCons1 = new ArrayList<String> ();
-		String lhsEqDeqCons1 = lhsEqDeqCons.get(0);
-		String rhsEqDeqCons1 = rhsEqDeqCons.get(0);
-		for (int i = 0; i < lhsEqDeqCons1.length(); i++) {
-			Character c = lhsEqDeqCons1.charAt(i);
-			ArrayList<String> c_split = u_variables_split.get(c);
-			for (int j = 0; j < c_split.size(); j++) {
-				splitLhsEqDeqCons1.add(c_split.get(j));				
-			}
-		}
-		for (int i = 0; i < rhsEqDeqCons1.length(); i++) {
-			Character c = rhsEqDeqCons1.charAt(i);
-			ArrayList<String> c_split = u_variables_split.get(c);
-			for (int j = 0; j < c_split.size(); j++) {
-				splitRhsEqDeqCons1.add(c_split.get(j));				
-			}
-		}
-		System.out.println("splitLhsEqDeqCons1: " + splitLhsEqDeqCons1);
-		System.out.println("splitRhsEqDeqCons1: " + splitRhsEqDeqCons1);
-		// fixedVars should contain the vallue(s) for each variable,
-		// for example fixedVars[x] = {y,z} means that x = y and x = z
+		// fixedVars should contain the value(s) for each variable,
+		// for example fixedVars[x1] = {y2,z3} means that x1 = y2 and x1 = z3
 		// fixedVars[x] = {.., x, ..} is not allowed
-		Map<Character, HashSet<Character> > fixedVars = new HashMap<Character, HashSet<Character> > ();
+		Map<String, HashSet<String> > fixedVars = new HashMap<String, HashSet<String> > ();
 		for (Character c: u_variables) {
-			HashSet<Character> c_values = new HashSet<Character> ();
-			fixedVars.put(c, c_values);			
+			for (String s: u_variables_split.get(c) ) {
+				HashSet<String> s_values = new HashSet<String> ();
+				fixedVars.put(s, s_values);					
+			}		
+		}
+		//System.out.println("fixedVars: " + fixedVars);
+		//System.out.println("fixedVars size: " + fixedVars.size());
+		for (int id = 0; id < lhsEqDeqCons.size(); id++) {
+			// each variable is expressed by its split variables,
+			// i.e x = u_variables[i] is written as u_variables_split[x]
+			ArrayList<String> splitLhsEqDeqConsI = new ArrayList<String> ();
+			ArrayList<String> splitRhsEqDeqConsI = new ArrayList<String> ();
+			String lhsEqDeqConsI = lhsEqDeqCons.get(id);
+			String rhsEqDeqConsI = rhsEqDeqCons.get(id);
+			for (int i = 0; i < lhsEqDeqConsI.length(); i++) {
+				Character c = lhsEqDeqConsI.charAt(i);
+				ArrayList<String> c_split = u_variables_split.get(c);
+				for (int j = 0; j < c_split.size(); j++) {
+					splitLhsEqDeqConsI.add(c_split.get(j));				
+				}
+			}
+			for (int i = 0; i < rhsEqDeqConsI.length(); i++) {
+				Character c = rhsEqDeqConsI.charAt(i);
+				ArrayList<String> c_split = u_variables_split.get(c);
+				for (int j = 0; j < c_split.size(); j++) {
+					splitRhsEqDeqConsI.add(c_split.get(j));				
+				}
+			}
+			//System.out.println("splitLhsEqDeqConsI: " + splitLhsEqDeqConsI);
+			//System.out.println("splitRhsEqDeqConsI: " + splitRhsEqDeqConsI);
+			fixVariables(fixedVars, splitLhsEqDeqConsI, splitRhsEqDeqConsI);	
 		}
 		System.out.println("fixedVars: " + fixedVars);
-		fixVariables(fixedVars, splitLhsEqDeqCons1, splitRhsEqDeqCons1);
+		//System.out.println("Permutations: " + getPermutations(2,2)); 
+		
 	}
 	
 	// this method should update fixedVars with the values obtained from the equality 
 	// given by splitLhsEqDeqCons and splitRhsEqDeqCons
-	private static void fixVariables(Map<Character, HashSet<Character>> fixedVars, ArrayList<String> splitLhsEqDeqCons,
+	private static void fixVariables(Map<String, HashSet<String>> fixedVars, ArrayList<String> splitLhsEqDeqCons,
 			ArrayList<String> splitRhsEqDeqCons) {
 		// TODO Auto-generated method stub
-		
-		
+		// shortSide should be in the left side of the equality
+		ArrayList<String> shortSide;
+		ArrayList<String> longSide;
+		int shortSize, longSize;
+		if (splitLhsEqDeqCons.size() <= splitRhsEqDeqCons.size()) {
+			shortSide = splitLhsEqDeqCons;
+			longSide = splitRhsEqDeqCons;			
+		}
+		else {
+			shortSide = splitRhsEqDeqCons;
+			longSide = splitLhsEqDeqCons;			
+		}
+		shortSize = shortSide.size();
+		longSize = longSide.size();
+		//System.out.println("shortSide: " + shortSide);
+		//System.out.println("longSide: " + longSide);
+		for (int i = 0; i < shortSize; i++) {
+			String leftStr = shortSide.get(i);
+			String rightStr = longSide.get(i);
+			if (!leftStr.equals(rightStr)) {
+				fixedVars.get(leftStr).add(rightStr);
+			}
+		}
+		for (int i = shortSize; i < longSize; i++) {
+			String rightStr = longSide.get(i);
+			fixedVars.get(rightStr).add("EPSILON");
+		}
 	}
 
 	private static int getNextSatIntegerArithDisjId(ArrayList<ArrayList<Map<Integer, Integer>>> refinedIntegerArithDnf,
@@ -981,4 +1008,5 @@ public class DemoProgram {
 		}
 		return result;
 	}
+	
 }
