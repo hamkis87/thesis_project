@@ -33,22 +33,17 @@ public class DemoProgramStr {
 		ArrayList<String> lhsOfMemCons_1 = new ArrayList<String>();
 		lhsOfMemCons_1.add("a");
 		lhsOfMemCons_1.add("b");
-		String lhsOfMemCons1 = "ab";
 		ArrayList<String> lhsOfMemCons_2 = new ArrayList<String>();
 		lhsOfMemCons_2.add("b");
-		String lhsOfMemCons2 = "b";
 		ArrayList<String> lhsOfMemCons_3 = new ArrayList<String>();
 		lhsOfMemCons_3.add("d");
 		lhsOfMemCons_3.add("b");
-		String lhsOfMemCons3 = "db";
 		ArrayList<String> lhsOfMemCons_4 = new ArrayList<String>();
 		lhsOfMemCons_4.add("c");
-		String lhsOfMemCons4 = "c";
 		ArrayList<String> lhsOfMemCons_5 = new ArrayList<String>();
 		lhsOfMemCons_5.add("e");
 		lhsOfMemCons_5.add("a");
 		lhsOfMemCons_5.add("c");
-		String lhsOfMemCons5 = "eac";
 		System.out.println("lhsOfMemCons_1 " + lhsOfMemCons_1);
 		System.out.println("lhsOfMemCons_2 " + lhsOfMemCons_2);
 		System.out.println("lhsOfMemCons_3 " + lhsOfMemCons_3);
@@ -65,18 +60,12 @@ public class DemoProgramStr {
 		Automaton rhsOfMemCons4 = r4.toAutomaton();
 		Automaton rhsOfMemCons5 = r5.toAutomaton();
 		ArrayList<ArrayList<String>> lhsOfMemCons_ = new ArrayList<ArrayList<String>> ();
-		List<String> lhsOfMemCons = new ArrayList<String> ();
 		List<Automaton> rhsOfMemCons = new ArrayList<Automaton> ();
 		lhsOfMemCons_.add(lhsOfMemCons_1);
 		lhsOfMemCons_.add(lhsOfMemCons_2);
 		lhsOfMemCons_.add(lhsOfMemCons_3);
 		lhsOfMemCons_.add(lhsOfMemCons_4);
 		lhsOfMemCons_.add(lhsOfMemCons_5);
-		lhsOfMemCons.add(0, lhsOfMemCons1);
-		lhsOfMemCons.add(1, lhsOfMemCons2);
-		lhsOfMemCons.add(2, lhsOfMemCons3);
-		lhsOfMemCons.add(3, lhsOfMemCons4);
-		lhsOfMemCons.add(4, lhsOfMemCons5);
 		//System.out.println("lhsOfMemCons_: " + lhsOfMemCons_);
 		rhsOfMemCons.add(0, rhsOfMemCons1);
 		rhsOfMemCons.add(1, rhsOfMemCons2);
@@ -93,12 +82,10 @@ public class DemoProgramStr {
 		 ******************************************************************************      
 		 */
 		List<Map<String, Integer>> lhsOfLenCons_ = new ArrayList<Map<String, Integer>> ();
-		List<Map<Character, Integer>> lhsOfLenCons = new ArrayList<Map<Character, Integer>> ();
 		List<Integer> rhsOfLenCons = new ArrayList<Integer> ();
 		List<IntegerRelation> relLhs2RhsOfLenCons = new ArrayList<IntegerRelation> ();
 		getLengthConstraints_(lhsOfLenCons_, relLhs2RhsOfLenCons, rhsOfLenCons);
-		getLengthConstraints(lhsOfLenCons, relLhs2RhsOfLenCons, rhsOfLenCons);
-		System.out.println("lhsOfLenCons = " + lhsOfLenCons);
+		//System.out.println("lhsOfLenCons = " + lhsOfLenCons);
 		System.out.println("lhsOfLenCons_ = " + lhsOfLenCons_);
 		System.out.println("rhsOfLenCons = " + rhsOfLenCons);
 		System.out.println("relLhs2RhsOfLenCons = " + relLhs2RhsOfLenCons);
@@ -130,10 +117,10 @@ public class DemoProgramStr {
 		ArrayList<ArrayList<Map<Integer, Integer> > > refinedIntegerArithDnf =
 				new ArrayList<ArrayList<Map<Integer, Integer> > > ();
 		ArrayList<String> variables_ = new ArrayList<String> ();
-		ArrayList<Character> variables = new ArrayList<Character> ();
+		//ArrayList<Character> variables = new ArrayList<Character> ();
 		processMembershipConstraints_(variables_, refinedIntegerArithDnf_, lhsOfMemCons_, rhsOfMemCons);
-		processMembershipConstraints(variables, refinedIntegerArithDnf, lhsOfMemCons, rhsOfMemCons);
-		System.out.println("variables: " + variables);
+		//processMembershipConstraints(variables, refinedIntegerArithDnf, lhsOfMemCons, rhsOfMemCons);
+		//System.out.println("variables: " + variables);
 		System.out.println("variables_: " + variables_);
 		System.out.println("refinedIntegerArithDnf: " + refinedIntegerArithDnf);
 		System.out.println("refinedIntegerArithDnf_: " + refinedIntegerArithDnf_);
@@ -143,10 +130,10 @@ public class DemoProgramStr {
 		else {		
 			final Context context = new Context();
 			final Solver solver = context.mkSimpleSolver();
-			Map<Character, IntExpr> lengthVariables_ = makeLengthVariables_(context, variables_);
-			System.out.println("lengthVariables = " + lengthVariables);
-			addLengthConstraintsToSolver(lhsOfLenCons, relLhs2RhsOfLenCons, rhsOfLenCons, 
-					                     lengthVariables, context, solver);
+			Map<String, IntExpr> lengthVariables_ = makeLengthVariables_(context, variables_);
+			System.out.println("lengthVariables_ = " + lengthVariables_);
+			addLengthConstraintsToSolver_(lhsOfLenCons_, relLhs2RhsOfLenCons, rhsOfLenCons, 
+					                     lengthVariables_, context, solver);
 			System.out.println("solver after adding length constraints= " + solver.toString());
 			//Status st = solver.check();
 			// if length constraints alone are satisfiable, we check the membership constraints
@@ -155,20 +142,99 @@ public class DemoProgramStr {
 				// the remaining code should go in here
 				int previousSatIntegerArithDisjId = -1;
 				//solver.push();
-				int nextSatIntegerArithDisjId = getNextSatIntegerArithDisjId(refinedIntegerArithDnf, 
-						                    lengthVariables, variables, context, solver, 
+				int nextSatIntegerArithDisjId_ = getNextSatIntegerArithDisjId_(refinedIntegerArithDnf_, 
+						                    lengthVariables_, variables_, context, solver, 
 						                    previousSatIntegerArithDisjId);
-				System.out.println("nextSatIntegerArithDisjId = " + nextSatIntegerArithDisjId);
+				System.out.println("nextSatIntegerArithDisjId_ = " + nextSatIntegerArithDisjId_);
 				System.out.println("solver after adding membership constraints= " + solver.toString());
 				
 				
 				//solver.pop();
 				
-				underApproximation(variables, lhsEqDeqCons, relLhs2RhsOfEqDeqCons, rhsEqDeqCons);
+				underApproximation_(variables_, lhsEqDeqCons_, relLhs2RhsOfEqDeqCons, rhsEqDeqCons_);
 				
 			}
 			
 		}
+		
+	}
+
+	private static void underApproximation_(ArrayList<String> u_variables_, ArrayList<ArrayList<String>> lhsEqDeqCons_,
+			List<EqualityRelation> relLhs2RhsOfEqDeqCons, ArrayList<ArrayList<String>> rhsEqDeqCons_) {
+		// TODO Auto-generated method stub
+		System.out.println("****************************************************************");
+		System.out.println("****************************************************************");
+		System.out.println("The UnderApproximation function");
+		System.out.println("The lhsEqDeqCons: " + lhsEqDeqCons_);
+		System.out.println("The relLhs2RhsOfEqDeqCons: " + relLhs2RhsOfEqDeqCons);
+		System.out.println("The rhsEqDeqCons: " + rhsEqDeqCons_);
+		// u_variables should be substituted with variable. it is used here for testing the
+		// underApproximation function implementation
+		//ArrayList<String> u_variables = new ArrayList<String> ();
+		// u_variables[i] is split into a number of variables. This number is u_variables_split_count[i]
+		ArrayList<Integer> u_variables_split_count = new ArrayList<Integer> ();
+		Map<String, ArrayList<String> > u_variables_split = new HashMap<String, ArrayList<String> > ();
+		
+		System.out.println("u_variables: " + u_variables_);
+		ArrayList<ArrayList<Integer>> lengthPermutations = new ArrayList<ArrayList<Integer>> ();
+		int K_parameter = 5;
+		for (ArrayList<Integer> permutation: getPermutations(K_parameter, u_variables_.size())) {
+			List<Integer> lengthPermutation = permutation.stream().map(number -> number + 1). 
+			        collect(Collectors.toList());
+			lengthPermutations.add((ArrayList<Integer>) lengthPermutation);			
+		}
+		System.out.println("lengthPermutations: " + lengthPermutations);
+		u_variables_split_count = lengthPermutations.get(7);
+		System.out.println("u_variables_split_count: " + u_variables_split_count);
+		for (int i = 0; i < u_variables_.size(); i++) {
+			String c = u_variables_.get(i);
+			int split_count = u_variables_split_count.get(i);
+			ArrayList<String> c_split_into = new ArrayList<String> ();
+			for (int j = 1; j <= split_count; j++) {
+				c_split_into.add(c + j);				
+			}
+			u_variables_split.put(c, c_split_into);
+		}
+		System.out.println("u_variables_split: " + u_variables_split);
+		// fixedVars should contain the value(s) for each variable,
+		// for example fixedVars[x1] = {y2,z3} means that x1 = y2 and x1 = z3
+		// fixedVars[x] = {.., x, ..} is not allowed
+		Map<String, HashSet<String> > fixedVars = new HashMap<String, HashSet<String> > ();
+		for (String c: u_variables_) {
+			for (String s: u_variables_split.get(c) ) {
+				HashSet<String> s_values = new HashSet<String> ();
+				fixedVars.put(s, s_values);					
+			}		
+		}
+		//System.out.println("fixedVars: " + fixedVars);
+		//System.out.println("fixedVars size: " + fixedVars.size());
+		for (int id = 0; id < lhsEqDeqCons_.size(); id++) {
+			// each variable is expressed by its split variables,
+			// i.e x = u_variables[i] is written as u_variables_split[x]
+			ArrayList<String> splitLhsEqDeqConsI = new ArrayList<String> ();
+			ArrayList<String> splitRhsEqDeqConsI = new ArrayList<String> ();
+			ArrayList<String> lhsEqDeqConsI = lhsEqDeqCons_.get(id);
+			ArrayList<String> rhsEqDeqConsI = rhsEqDeqCons_.get(id);
+			for (int i = 0; i < lhsEqDeqConsI.size(); i++) {
+				String c = lhsEqDeqConsI.get(i);
+				ArrayList<String> c_split = u_variables_split.get(c);
+				for (int j = 0; j < c_split.size(); j++) {
+					splitLhsEqDeqConsI.add(c_split.get(j));				
+				}
+			}
+			for (int i = 0; i < rhsEqDeqConsI.size(); i++) {
+				String c = rhsEqDeqConsI.get(i);
+				ArrayList<String> c_split = u_variables_split.get(c);
+				for (int j = 0; j < c_split.size(); j++) {
+					splitRhsEqDeqConsI.add(c_split.get(j));				
+				}
+			}
+			//System.out.println("splitLhsEqDeqConsI: " + splitLhsEqDeqConsI);
+			//System.out.println("splitRhsEqDeqConsI: " + splitRhsEqDeqConsI);
+			fixVariables(fixedVars, splitLhsEqDeqConsI, splitRhsEqDeqConsI);	
+		}
+		System.out.println("fixedVars: " + fixedVars);
+		//System.out.println("Permutations: " + getPermutations(2,2)); 
 		
 	}
 
@@ -283,20 +349,20 @@ public class DemoProgramStr {
 		}
 	}
 
-	private static int getNextSatIntegerArithDisjId(ArrayList<ArrayList<Map<Integer, Integer>>> refinedIntegerArithDnf,
-			Map<Character, IntExpr> lengthVariables, ArrayList<Character> variables, Context context, Solver solver,
-			int previousSatIntegerArithDisjId) {
+	private static int getNextSatIntegerArithDisjId_(
+			ArrayList<ArrayList<Map<Integer, Integer>>> refinedIntegerArithDnf_, Map<String, IntExpr> lengthVariables_,
+			ArrayList<String> variables_, Context context, Solver solver, int previousSatIntegerArithDisjId) {
 		// TODO Auto-generated method stub
 		// the previous IntegerArithDisj didn't result in SAT constraints, so 
 		// have to examine the next IntegerArithDisj
 		int nextIntegerArithDisjId = previousSatIntegerArithDisjId + 1;
-		while(nextIntegerArithDisjId < refinedIntegerArithDnf.size()) {	 
+		while(nextIntegerArithDisjId < refinedIntegerArithDnf_.size()) {	 
 			ArrayList<Map<Integer, Integer>> nextIntegerArithDisj = 
-					refinedIntegerArithDnf.get(nextIntegerArithDisjId);
+					refinedIntegerArithDnf_.get(nextIntegerArithDisjId);
 			solver.push();
-			boolean isSat = testSat(nextIntegerArithDisj, lengthVariables, variables, context, solver);
-			System.out.println("isSat = " + isSat);
-			if (isSat) {
+			boolean isSat_ = testSat_(nextIntegerArithDisj, lengthVariables_, variables_, context, solver);
+			System.out.println("isSat = " + isSat_);
+			if (isSat_) {
 				return nextIntegerArithDisjId;				
 			}
 			else {
@@ -307,6 +373,86 @@ public class DemoProgramStr {
 		return nextIntegerArithDisjId;
 	}
 
+	private static boolean testSat_(ArrayList<Map<Integer, Integer>> lassoList,
+			Map<String, IntExpr> lengthVariables_, ArrayList<String> variables_, Context ctx, Solver solver) {
+		// TODO Auto-generated method stub
+		// ArrayList<ArrayList<Map<Integer, Integer> > > integerArithDnf 
+		// [{0=0}, {0=2, 1=1, 2=1}, {1=3}, {1=0, 2=2}]
+		// this represents the following:
+		// (len(var0) = 0) and (len(var1) = 2i or len(var1) = 1 + i or len(var1) = 2 + i) and
+		// (len(var2) = 1 + 3i) and (len(var3) = 1 or len(var3) = 2 + 2i)
+		// note that i above is not essentially the same in each equation
+		//System.out.println("lassoList = " + lassoList);
+		ArrayList<BoolExpr> linearConstraints = new ArrayList<BoolExpr> ();
+		// the length constraint for each var is : len(var) = k + v*i
+		ArrayList<IntExpr> vars = new ArrayList<IntExpr> ();
+		for (String c: lengthVariables_.keySet()) {
+			IntExpr var = lengthVariables_.get(c);
+			// each var >= 0
+			BoolExpr nonNegativeVar = ctx.mkGe(var, ctx.mkInt(0));
+			solver.add(nonNegativeVar);
+			//System.out.println("nonNegativeVar: " + nonNegativeVar);
+			
+		}
+		//System.out.println("variables: " + vars);
+		
+		// Example: varKIMaps[0] = {0=i_0_0, 1=i_0_1, 2=i_0_2}
+		// means that len(var_0) = 0+ v0*i_0_0 or len(var_0) = 1+ v1*i_0_1 or 
+		//            len(var_0) = 2+ v2*i_0_2 where lasso(var_0) = {0=v0, 1=v1, 2=v2}
+		ArrayList<Map<Integer, IntExpr> >  varKIMaps = new ArrayList<Map<Integer, IntExpr> > ();
+		for (int i = 0; i < lassoList.size(); i++) {
+			Map<Integer, Integer> lasso = lassoList.get(i);
+			Map<Integer, IntExpr> varKIMap = new HashMap<Integer, IntExpr> ();
+			for (int k: lasso.keySet()) {
+				String s = "i_" + Integer.toString(i) + "_" + Integer.toString(k);
+				IntExpr iVar = ctx.mkIntConst(s); 
+				varKIMap.put(k, iVar);									
+				BoolExpr nonNegativeI = ctx.mkGe(iVar, ctx.mkInt(0));
+				solver.add(nonNegativeI);
+			}
+			varKIMaps.add(i, varKIMap);
+		}
+		//System.out.println("i_variables: " + varKIMaps);
+		// to do: add the constraint that variables are >= to 0
+		for (int i = 0; i < lassoList.size(); i++) {
+			IntExpr var = lengthVariables_.get(variables_.get(i));
+			Map<Integer, Integer> lasso = lassoList.get(i);
+			//System.out.println(lasso);
+			Map<Integer, IntExpr> varKIMap = varKIMaps.get(i);
+			Set<Integer> varKs = lasso.keySet();
+			if (varKs.size() == 1) {
+				for (int k: varKs) {
+					IntExpr k_term = ctx.mkInt(k);
+					IntExpr vi_term = (IntExpr) ctx.mkMul(ctx.mkInt(lasso.get(k)), varKIMap.get(k));
+					BoolExpr linearConstraint = ctx.mkEq(var, ctx.mkAdd(k_term, vi_term));	
+					linearConstraints.add(i, linearConstraint);
+					solver.add(linearConstraint);
+					//System.out.println(linearConstraint);					
+				}			
+			}
+			else {
+				BoolExpr linearConstraint = ctx.mkBool(false);
+				for (int k: varKs) {
+					IntExpr k_term = ctx.mkInt(k);
+					IntExpr vi_term = (IntExpr) ctx.mkMul(ctx.mkInt(lasso.get(k)), varKIMap.get(k));
+					BoolExpr linearConstraintDisj = ctx.mkEq(var, ctx.mkAdd(k_term, vi_term));
+					linearConstraint = ctx.mkOr(linearConstraint, linearConstraintDisj);
+				}
+				linearConstraints.add(i, linearConstraint);	
+				solver.add(linearConstraint);
+				//System.out.println(linearConstraint);
+			}
+		}
+		System.out.println("solver in the testSat function: " + solver);
+		Status satStatus = solver.check();
+		boolean isSat = satStatus.equals(Status.SATISFIABLE);
+		//System.out.println("Constraints are SAT: " + isSat);
+		//final Model model = solver.getModel();
+		//System.out.println(model.toString());
+		//System.out.println("linearConstraints: " + linearConstraints);
+		//ctx.close();
+		return isSat;
+	}
 	
 	public static boolean testSat(ArrayList<Map<Integer, Integer> >  lassoList, 
 			Map<Character, IntExpr> lengthVariables, ArrayList<Character> variables,
@@ -389,20 +535,20 @@ public class DemoProgramStr {
 		return isSat;
 	}
 
-	private static void addLengthConstraintsToSolver(List<Map<Character, Integer>> lhsOfLenCons,
+	private static void addLengthConstraintsToSolver_(List<Map<String, Integer>> lhsOfLenCons_,
 			List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons,
-			Map<Character, IntExpr> lengthVariables, Context context, Solver solver) {
+			Map<String, IntExpr> lengthVariables_, Context context, Solver solver) {
 		// TODO Auto-generated method stub
-		for (int i = 0; i < lhsOfLenCons.size(); i++) {
-			Map<Character, Integer> lhsOfLenConsI = lhsOfLenCons.get(i);
+		for (int i = 0; i < lhsOfLenCons_.size(); i++) {
+			Map<String, Integer> lhsOfLenConsI_ = lhsOfLenCons_.get(i);
 			IntegerRelation relLhs2RhsOfLenConsI = relLhs2RhsOfLenCons.get(i);
 			int rhsOfLenConsI = rhsOfLenCons.get(i);
 			IntExpr lhsI = context.mkInt(0);
 			IntExpr rhsI = context.mkInt(rhsOfLenConsI);
 			BoolExpr b = context.mkBool(true);
-			for (Character c: lhsOfLenConsI.keySet()) {
-				IntExpr x = lengthVariables.get(c);
-				IntExpr a = context.mkInt(lhsOfLenConsI.get(c));
+			for (String c: lhsOfLenConsI_.keySet()) {
+				IntExpr x = lengthVariables_.get(c);
+				IntExpr a = context.mkInt(lhsOfLenConsI_.get(c));
 				lhsI = (IntExpr) context.mkAdd(context.mkMul(x,a), lhsI);
 			}
 			switch (relLhs2RhsOfLenConsI) {
@@ -428,12 +574,12 @@ public class DemoProgramStr {
 			solver.add(b);
 		}
 	}
-
-	private static Map<Character, IntExpr> makeLengthVariables(Context context, ArrayList<Character> variables) {
+	
+	private static Map<String, IntExpr> makeLengthVariables_(Context context, ArrayList<String> variables_) {
 		// TODO Auto-generated method stub
-		Map<Character, IntExpr> lengthVariables = new HashMap<Character, IntExpr> ();
-		for (Character c: variables) {
-			IntExpr x = context.mkIntConst("len_" + Character.toString(c));
+		Map<String, IntExpr> lengthVariables = new HashMap<String, IntExpr> ();
+		for (String c: variables_) {
+			IntExpr x = context.mkIntConst("len_" + c);
 			lengthVariables.put(c, x);
 		}
 		return lengthVariables;
