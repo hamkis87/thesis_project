@@ -30,50 +30,9 @@ public class DemoProgramStr {
 		//			for example if the disjunct is:
 		//					
 		//
-		ArrayList<String> lhsOfMemCons_1 = new ArrayList<String>();
-		lhsOfMemCons_1.add("a");
-		lhsOfMemCons_1.add("b");
-		ArrayList<String> lhsOfMemCons_2 = new ArrayList<String>();
-		lhsOfMemCons_2.add("b");
-		ArrayList<String> lhsOfMemCons_3 = new ArrayList<String>();
-		lhsOfMemCons_3.add("d");
-		lhsOfMemCons_3.add("b");
-		ArrayList<String> lhsOfMemCons_4 = new ArrayList<String>();
-		lhsOfMemCons_4.add("c");
-		ArrayList<String> lhsOfMemCons_5 = new ArrayList<String>();
-		lhsOfMemCons_5.add("e");
-		lhsOfMemCons_5.add("a");
-		lhsOfMemCons_5.add("c");
-		System.out.println("lhsOfMemCons_1 " + lhsOfMemCons_1);
-		System.out.println("lhsOfMemCons_2 " + lhsOfMemCons_2);
-		System.out.println("lhsOfMemCons_3 " + lhsOfMemCons_3);
-		System.out.println("lhsOfMemCons_4 " + lhsOfMemCons_4);
-		System.out.println("lhsOfMemCons_5 " + lhsOfMemCons_5);
-		RegExp r1 = new RegExp("(w|z)+");
-		RegExp r2 = new RegExp("(wz|zw)*");
-		RegExp r3 = new RegExp("w|z");
-		RegExp r4 = new RegExp("(w|z|wz)*");
-		RegExp r5 = new RegExp("z+");
-		Automaton rhsOfMemCons1 = r1.toAutomaton();
-		Automaton rhsOfMemCons2 = r2.toAutomaton();
-		Automaton rhsOfMemCons3 = r3.toAutomaton();
-		Automaton rhsOfMemCons4 = r4.toAutomaton();
-		Automaton rhsOfMemCons5 = r5.toAutomaton();
 		ArrayList<ArrayList<String>> lhsOfMemCons_ = new ArrayList<ArrayList<String>> ();
 		List<Automaton> rhsOfMemCons = new ArrayList<Automaton> ();
-		lhsOfMemCons_.add(lhsOfMemCons_1);
-		lhsOfMemCons_.add(lhsOfMemCons_2);
-		lhsOfMemCons_.add(lhsOfMemCons_3);
-		lhsOfMemCons_.add(lhsOfMemCons_4);
-		lhsOfMemCons_.add(lhsOfMemCons_5);
-		//System.out.println("lhsOfMemCons_: " + lhsOfMemCons_);
-		rhsOfMemCons.add(0, rhsOfMemCons1);
-		rhsOfMemCons.add(1, rhsOfMemCons2);
-		rhsOfMemCons.add(2, rhsOfMemCons3);
-		rhsOfMemCons.add(3, rhsOfMemCons4);
-		rhsOfMemCons.add(4, rhsOfMemCons5);	
-		//System.out.println("rhsOfMembershipCons: " + rhsOfMembershipCons);
-		
+		getMemConstraints(lhsOfMemCons_, rhsOfMemCons);
 		/******************************************************************************
 		 * the length constraint (2y - 4x + w >= 2) is expressed as follows: 
 		 *      lhsOfLenCon = {'x'=-4, 'y'=2, 'w'=1}
@@ -100,12 +59,8 @@ public class DemoProgramStr {
 		 */
 		ArrayList<ArrayList<String>> lhsEqDeqCons_ = new ArrayList<ArrayList<String>> ();
 		ArrayList<ArrayList<String>> rhsEqDeqCons_ = new ArrayList<ArrayList<String>> ();
-		List<String> lhsEqDeqCons = new ArrayList<String> ();
-		List<String> rhsEqDeqCons = new ArrayList<String> ();
 		List<EqualityRelation> relLhs2RhsOfEqDeqCons = new ArrayList<EqualityRelation> ();
 		getEqDeqConstraints_(lhsEqDeqCons_, relLhs2RhsOfEqDeqCons, rhsEqDeqCons_);
-		System.out.println("lhsEqDeqCons = " + lhsEqDeqCons);
-		System.out.println("rhsEqDeqCons = " + rhsEqDeqCons);
 		System.out.println("lhsEqDeqCons_ = " + lhsEqDeqCons_);
 		System.out.println("rhsEqDeqCons_ = " + rhsEqDeqCons_);
 		System.out.println("relLhs2RhsOfEqDeqCons = " + relLhs2RhsOfEqDeqCons);
@@ -144,7 +99,15 @@ public class DemoProgramStr {
 				
 				//solver.pop();
 				
-				underApproximation_(variables_, lhsEqDeqCons_, relLhs2RhsOfEqDeqCons, rhsEqDeqCons_);
+				underApproximation_(variables_, 
+						            lhsEqDeqCons_, 
+						            relLhs2RhsOfEqDeqCons, 
+						            rhsEqDeqCons_,
+						            lhsOfMemCons_, 
+						            rhsOfMemCons,
+						            lhsOfLenCons_, 
+						            relLhs2RhsOfLenCons, 
+						            rhsOfLenCons);
 				
 			}
 			
@@ -152,8 +115,49 @@ public class DemoProgramStr {
 		
 	}
 
+	private static void getMemConstraints(ArrayList<ArrayList<String>> lhsOfMemCons,
+			List<Automaton> rhsOfMemCons) {
+		// TODO Auto-generated method stub
+		ArrayList<String> lhsOfMemCons_1 = new ArrayList<String>();
+		lhsOfMemCons_1.add("a");
+		lhsOfMemCons_1.add("b");
+		ArrayList<String> lhsOfMemCons_2 = new ArrayList<String>();
+		lhsOfMemCons_2.add("b");
+		ArrayList<String> lhsOfMemCons_3 = new ArrayList<String>();
+		lhsOfMemCons_3.add("d");
+		lhsOfMemCons_3.add("b");
+		ArrayList<String> lhsOfMemCons_4 = new ArrayList<String>();
+		lhsOfMemCons_4.add("c");
+		ArrayList<String> lhsOfMemCons_5 = new ArrayList<String>();
+		lhsOfMemCons_5.add("e");
+		lhsOfMemCons_5.add("a");
+		lhsOfMemCons_5.add("c");
+
+		RegExp r1 = new RegExp("(w|z)+");
+		RegExp r2 = new RegExp("(wz|zw)*");
+		RegExp r3 = new RegExp("w|z");
+		RegExp r4 = new RegExp("(w|z|wz)*");
+		RegExp r5 = new RegExp("z+");
+		Automaton rhsOfMemCons1 = r1.toAutomaton();
+		Automaton rhsOfMemCons2 = r2.toAutomaton();
+		Automaton rhsOfMemCons3 = r3.toAutomaton();
+		Automaton rhsOfMemCons4 = r4.toAutomaton();
+		Automaton rhsOfMemCons5 = r5.toAutomaton();
+		lhsOfMemCons.add(lhsOfMemCons_1);
+		lhsOfMemCons.add(lhsOfMemCons_2);
+		lhsOfMemCons.add(lhsOfMemCons_3);
+		lhsOfMemCons.add(lhsOfMemCons_4);
+		lhsOfMemCons.add(lhsOfMemCons_5);
+		
+		rhsOfMemCons.add(rhsOfMemCons1);
+		rhsOfMemCons.add(rhsOfMemCons2);
+		rhsOfMemCons.add(rhsOfMemCons3);
+		rhsOfMemCons.add(rhsOfMemCons4);
+		rhsOfMemCons.add(rhsOfMemCons5);
+	}
+
 	private static void underApproximation_(ArrayList<String> u_variables_, ArrayList<ArrayList<String>> lhsEqDeqCons_,
-			List<EqualityRelation> relLhs2RhsOfEqDeqCons, ArrayList<ArrayList<String>> rhsEqDeqCons_) {
+			List<EqualityRelation> relLhs2RhsOfEqDeqCons, ArrayList<ArrayList<String>> rhsEqDeqCons_, ArrayList<ArrayList<String>> lhsOfMemCons_, List<Automaton> rhsOfMemCons, List<Map<String, Integer>> lhsOfLenCons_, List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons) {
 		// TODO Auto-generated method stub
 		System.out.println("****************************************************************");
 		System.out.println("****************************************************************");
@@ -227,10 +231,28 @@ public class DemoProgramStr {
 			fixVariables(fixedVars, splitLhsEqDeqConsI, splitRhsEqDeqConsI);	
 		}
 		System.out.println("fixedVars: " + fixedVars);
-		//System.out.println("Permutations: " + getPermutations(2,2)); 
+		//System.out.println("Permutations: " + getPermutations(2,2));
+		// In newLhsOfMemCons, variables are substituted according to u_variables_split
+		ArrayList<ArrayList<String>> newLhsOfMemCons = new ArrayList<ArrayList<String>> ();
+		getNewLhsOfMemCons(newLhsOfMemCons, lhsOfMemCons_, u_variables_split);
+		System.out.println("lhsOfMemCons_: " + lhsOfMemCons_);
+		System.out.println("newLhsOfMemCons: " + newLhsOfMemCons);
 		
 	}
 	
+	private static void getNewLhsOfMemCons(ArrayList<ArrayList<String>> newLhsOfMemCons,
+			ArrayList<ArrayList<String>> oldLhsOfMemCons, Map<String, ArrayList<String>> variables_split) {
+		// TODO Auto-generated method stub
+		for (int i = 0; i < oldLhsOfMemCons.size(); i++) {
+			ArrayList<String> oldLhsCons = oldLhsOfMemCons.get(i);
+			ArrayList<String> newLhsCons = new ArrayList<String> ();
+			for (int j = 0; j < oldLhsCons.size(); j++) {
+				newLhsCons.addAll(variables_split.get(oldLhsCons.get(j)));				
+			}
+			newLhsOfMemCons.add(newLhsCons);
+		}
+	}
+
 	// this method should update fixedVars with the values obtained from the equality 
 	// given by splitLhsEqDeqCons and splitRhsEqDeqCons
 	private static void fixVariables(Map<String, HashSet<String>> fixedVars, ArrayList<String> splitLhsEqDeqCons,
