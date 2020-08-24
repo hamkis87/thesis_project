@@ -119,41 +119,43 @@ public class DemoProgramStr {
 			List<Automaton> rhsOfMemCons) {
 		// TODO Auto-generated method stub
 		ArrayList<String> lhsOfMemCons_1 = new ArrayList<String>();
-		lhsOfMemCons_1.add("a");
-		lhsOfMemCons_1.add("b");
+		lhsOfMemCons_1.add("x");
+		lhsOfMemCons_1.add("y");
+		lhsOfMemCons_1.add("m");
 		ArrayList<String> lhsOfMemCons_2 = new ArrayList<String>();
-		lhsOfMemCons_2.add("b");
+		lhsOfMemCons_2.add("m");
 		ArrayList<String> lhsOfMemCons_3 = new ArrayList<String>();
-		lhsOfMemCons_3.add("d");
-		lhsOfMemCons_3.add("b");
-		ArrayList<String> lhsOfMemCons_4 = new ArrayList<String>();
-		lhsOfMemCons_4.add("c");
-		ArrayList<String> lhsOfMemCons_5 = new ArrayList<String>();
-		lhsOfMemCons_5.add("e");
-		lhsOfMemCons_5.add("a");
-		lhsOfMemCons_5.add("c");
-
-		RegExp r1 = new RegExp("(w|z)+");
-		RegExp r2 = new RegExp("(wz|zw)*");
-		RegExp r3 = new RegExp("w|z");
-		RegExp r4 = new RegExp("(w|z|wz)*");
-		RegExp r5 = new RegExp("z+");
+		lhsOfMemCons_3.add("z");
+		lhsOfMemCons_3.add("w");
+		//ArrayList<String> lhsOfMemCons_4 = new ArrayList<String>();
+		//lhsOfMemCons_4.add("w");
+		//ArrayList<String> lhsOfMemCons_5 = new ArrayList<String>();
+		//lhsOfMemCons_5.add("w");
+		//lhsOfMemCons_5.add("x");
+		//lhsOfMemCons_5.add("z");
+        // xym = cab.ab.b
+		// zw = ba.ba
+		RegExp r1 = new RegExp("(a|b|c)*");
+		RegExp r2 = new RegExp("b*");
+		RegExp r3 = new RegExp("(a|b)*");
+		//RegExp r4 = new RegExp("(c|a)+");
+		//RegExp r5 = new RegExp("z+");
 		Automaton rhsOfMemCons1 = r1.toAutomaton();
 		Automaton rhsOfMemCons2 = r2.toAutomaton();
 		Automaton rhsOfMemCons3 = r3.toAutomaton();
-		Automaton rhsOfMemCons4 = r4.toAutomaton();
-		Automaton rhsOfMemCons5 = r5.toAutomaton();
+		//Automaton rhsOfMemCons4 = r4.toAutomaton();
+		//Automaton rhsOfMemCons5 = r5.toAutomaton();
 		lhsOfMemCons.add(lhsOfMemCons_1);
 		lhsOfMemCons.add(lhsOfMemCons_2);
 		lhsOfMemCons.add(lhsOfMemCons_3);
-		lhsOfMemCons.add(lhsOfMemCons_4);
-		lhsOfMemCons.add(lhsOfMemCons_5);
+		//lhsOfMemCons.add(lhsOfMemCons_4);
+		//lhsOfMemCons.add(lhsOfMemCons_5);
 		
 		rhsOfMemCons.add(rhsOfMemCons1);
 		rhsOfMemCons.add(rhsOfMemCons2);
 		rhsOfMemCons.add(rhsOfMemCons3);
-		rhsOfMemCons.add(rhsOfMemCons4);
-		rhsOfMemCons.add(rhsOfMemCons5);
+		//rhsOfMemCons.add(rhsOfMemCons4);
+		//rhsOfMemCons.add(rhsOfMemCons5);
 	}
 
 	private static void underApproximation_(ArrayList<String> u_variables_, ArrayList<ArrayList<String>> lhsEqDeqCons_,
@@ -237,9 +239,29 @@ public class DemoProgramStr {
 		getNewLhsOfMemCons(newLhsOfMemCons, lhsOfMemCons_, u_variables_split);
 		System.out.println("lhsOfMemCons_: " + lhsOfMemCons_);
 		System.out.println("newLhsOfMemCons: " + newLhsOfMemCons);
-		
+		// ArrayList<ArrayList<String>> lhsOfLenCons_, List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons
+		List<Map<String, Integer>>  newlhsOfLenCons = new ArrayList<Map<String, Integer>> ();
+		getNewLhsOfLenCons(newlhsOfLenCons, lhsOfLenCons_, u_variables_split);
+		System.out.println("lhsOfLenCons_: " + lhsOfLenCons_);
+		System.out.println("newlhsOfLenCons: " + newlhsOfLenCons);		
 	}
 	
+	private static void getNewLhsOfLenCons(List<Map<String, Integer>> newLhsOfLenCons,
+			List<Map<String, Integer>> oldLhsOfLenCons, Map<String, ArrayList<String>> variables_split) {
+		// TODO Auto-generated method stub
+		for (int i = 0; i < oldLhsOfLenCons.size(); i++) {
+			Map<String, Integer> oldLenCons = oldLhsOfLenCons.get(i);
+			Map<String, Integer> newLenCons = new HashMap<String, Integer> ();
+			for (String strVar: oldLenCons.keySet()) {
+				int varLength = oldLenCons.get(strVar);
+				for (String s: variables_split.get(strVar)) {
+					newLenCons.put(s, varLength);																									
+				}
+			}
+			newLhsOfLenCons.add(newLenCons);
+		}
+	}
+
 	private static void getNewLhsOfMemCons(ArrayList<ArrayList<String>> newLhsOfMemCons,
 			ArrayList<ArrayList<String>> oldLhsOfMemCons, Map<String, ArrayList<String>> variables_split) {
 		// TODO Auto-generated method stub
@@ -533,18 +555,23 @@ public class DemoProgramStr {
 		ArrayList<String> rhsEqDeqCons1_ = new ArrayList<String> ();
 		ArrayList<String> rhsEqDeqCons2_ = new ArrayList<String> ();
 		//String rhsEqDeqCons1, rhsEqDeqCons2;
-		
-		lhsEqDeqCons1_.add("a");
-		lhsEqDeqCons1_.add("c");
-		rhsEqDeqCons1_.add("b");
-		rhsEqDeqCons1_.add("e");
+        // xym = cab.ab.b
+		// zw = ba.ba
+		lhsEqDeqCons1_.add("z");
+		lhsEqDeqCons1_.add("w");
+		lhsEqDeqCons1_.add("m");
+		rhsEqDeqCons1_.add("m");
+		rhsEqDeqCons1_.add("y");
+		rhsEqDeqCons1_.add("y");
 		relLhs2RhsOfEqDeqCons1 = EqualityRelation.EQUAL;
 		lhsEqDeqCons_.add(lhsEqDeqCons1_);
 		rhsEqDeqCons_.add(rhsEqDeqCons1_);
 		relLhs2RhsOfEqDeqCons.add(relLhs2RhsOfEqDeqCons1);
 		
-		lhsEqDeqCons2_.add("d");
-		rhsEqDeqCons2_.add("b");
+		lhsEqDeqCons2_.add("m");
+		lhsEqDeqCons2_.add("y");
+		rhsEqDeqCons2_.add("w");
+		rhsEqDeqCons2_.add("m");
 		relLhs2RhsOfEqDeqCons2 = EqualityRelation.EQUAL;
 		lhsEqDeqCons_.add(lhsEqDeqCons2_);
 		rhsEqDeqCons_.add(rhsEqDeqCons2_);
@@ -560,26 +587,27 @@ public class DemoProgramStr {
 		Map<String, Integer> lhsOfLenCons3 = new HashMap<String, Integer> ();
 		int rhsOfLenCons1, rhsOfLenCons2, rhsOfLenCons3;
 		IntegerRelation relLhs2RhsOfLenCons1, relLhs2RhsOfLenCons2, relLhs2RhsOfLenCons3;
-	
-		lhsOfLenCons1.put("b", 2);
-		lhsOfLenCons1.put("a", -4);
-		rhsOfLenCons1 = 5;
+        // xym = cab.ab.b
+		// zw = ba.ba
+		lhsOfLenCons1.put("x", 1);
+		lhsOfLenCons1.put("m", -1);
+		rhsOfLenCons1 = 1;
 		relLhs2RhsOfLenCons1 = IntegerRelation.GREATER;
 		lhsOfLenCons_.add(lhsOfLenCons1);
 		relLhs2RhsOfLenCons.add(relLhs2RhsOfLenCons1);
 		rhsOfLenCons.add(rhsOfLenCons1);
 		
-		lhsOfLenCons2.put("a", 1);
-		lhsOfLenCons2.put("b", 1);
-		lhsOfLenCons2.put("c", 1);
-		rhsOfLenCons2 = 8;
+		lhsOfLenCons2.put("w", 2);
+		lhsOfLenCons2.put("z", 1);
+		lhsOfLenCons2.put("y", 1);
+		rhsOfLenCons2 = 10;
 		relLhs2RhsOfLenCons2 = IntegerRelation.LESS;
 		lhsOfLenCons_.add(lhsOfLenCons2);
 		relLhs2RhsOfLenCons.add(relLhs2RhsOfLenCons2);
 		rhsOfLenCons.add(rhsOfLenCons2);
 		
-		lhsOfLenCons3.put("e", 1);
-		rhsOfLenCons3 = 3;
+		lhsOfLenCons3.put("x", 3);
+		rhsOfLenCons3 = 9;
 		relLhs2RhsOfLenCons3 = IntegerRelation.GREATEREQUAL;
 		lhsOfLenCons_.add(lhsOfLenCons3);
 		relLhs2RhsOfLenCons.add(relLhs2RhsOfLenCons3);
