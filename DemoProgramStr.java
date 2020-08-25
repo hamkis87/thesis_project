@@ -107,7 +107,10 @@ public class DemoProgramStr {
 						            rhsOfMemCons,
 						            lhsOfLenCons_, 
 						            relLhs2RhsOfLenCons, 
-						            rhsOfLenCons);
+						            rhsOfLenCons,
+						            lengthVariables_,
+						            context,
+						            solver);
 				
 			}
 			
@@ -159,7 +162,7 @@ public class DemoProgramStr {
 	}
 
 	private static void underApproximation_(ArrayList<String> u_variables_, ArrayList<ArrayList<String>> lhsEqDeqCons_,
-			List<EqualityRelation> relLhs2RhsOfEqDeqCons, ArrayList<ArrayList<String>> rhsEqDeqCons_, ArrayList<ArrayList<String>> lhsOfMemCons_, List<Automaton> rhsOfMemCons, List<Map<String, Integer>> lhsOfLenCons_, List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons) {
+			List<EqualityRelation> relLhs2RhsOfEqDeqCons, ArrayList<ArrayList<String>> rhsEqDeqCons_, ArrayList<ArrayList<String>> lhsOfMemCons_, List<Automaton> rhsOfMemCons, List<Map<String, Integer>> lhsOfLenCons_, List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons, Map<String, IntExpr> oldLengthVariables, Context context, Solver solver) {
 		// TODO Auto-generated method stub
 		System.out.println("****************************************************************");
 		System.out.println("****************************************************************");
@@ -173,7 +176,7 @@ public class DemoProgramStr {
 		// u_variables[i] is split into a number of variables. This number is u_variables_split_count[i]
 		ArrayList<Integer> u_variables_split_count = new ArrayList<Integer> ();
 		Map<String, ArrayList<String> > u_variables_split = new HashMap<String, ArrayList<String> > ();
-		
+		ArrayList<String> extended_variables = new ArrayList<String> ();
 		System.out.println("u_variables: " + u_variables_);
 		ArrayList<ArrayList<Integer>> lengthPermutations = new ArrayList<ArrayList<Integer>> ();
 		int K_parameter = 5;
@@ -192,9 +195,11 @@ public class DemoProgramStr {
 			for (int j = 1; j <= split_count; j++) {
 				c_split_into.add(c + j);				
 			}
+			extended_variables.addAll(c_split_into);
 			u_variables_split.put(c, c_split_into);
 		}
 		System.out.println("u_variables_split: " + u_variables_split);
+		System.out.println("extended_variables: " + extended_variables);
 		// fixedVars should contain the value(s) for each variable,
 		// for example fixedVars[x1] = {y2,z3} means that x1 = y2 and x1 = z3
 		// fixedVars[x] = {.., x, ..} is not allowed
@@ -243,9 +248,48 @@ public class DemoProgramStr {
 		List<Map<String, Integer>>  newlhsOfLenCons = new ArrayList<Map<String, Integer>> ();
 		getNewLhsOfLenCons(newlhsOfLenCons, lhsOfLenCons_, u_variables_split);
 		System.out.println("lhsOfLenCons_: " + lhsOfLenCons_);
-		System.out.println("newlhsOfLenCons: " + newlhsOfLenCons);		
+		System.out.println("newlhsOfLenCons: " + newlhsOfLenCons);
+		Map<String, IntExpr> newLengthVariables = makeLengthVariables_(context, extended_variables);
+		System.out.println("newLengthVariables: " + newLengthVariables);
+		addLengthConstraintsToSolver_(newlhsOfLenCons, relLhs2RhsOfLenCons, rhsOfLenCons, 
+				newLengthVariables, context, solver);
+		addSplitVariablesToSolver(oldLengthVariables, newLengthVariables, u_variables_split, context, solver);
+		addfixedVariablesToSolver(fixedVars, newLengthVariables, context, solver);
+		System.out.println("solver = " + solver.toString());
 	}
 	
+	private static void addfixedVariablesToSolver(Map<String, HashSet<String>> fixedVars,
+			Map<String, IntExpr> newLengthVariables, Context context, Solver solver) {
+		// TODO Auto-generated method stub
+		for (String lvar: fixedVars.keySet()) {
+			if (fixedVars.get(lvar).size() > 0) {
+				IntExpr leftVar = newLengthVariables.get(lvar);
+				for (String rvar: fixedVars.get(lvar)) {
+					IntExpr rightVar = context.mkInt(0);						
+					if (!rvar.equals("EPSILON")) {
+						rightVar = newLengthVariables.get(rvar);											
+					}
+					BoolExpr b = context.mkEq(leftVar, rightVar);
+					solver.add(b);	
+				}			
+			}
+		}
+	}
+
+	private static void addSplitVariablesToSolver(Map<String, IntExpr> oldLengthVariables,
+			Map<String, IntExpr> newLengthVariables, Map<String, ArrayList<String>> variables_split, Context context, Solver solver) {
+		// TODO Auto-generated method stub
+		for (String leftVar: variables_split.keySet()) {
+			IntExpr oldVar = oldLengthVariables.get(leftVar);
+			IntExpr extendedVar = context.mkInt(0);			
+			for (String rightVar: variables_split.get(leftVar)) {
+				extendedVar = (IntExpr) context.mkAdd(newLengthVariables.get(rightVar), extendedVar);												
+			}
+			BoolExpr b = context.mkEq(oldVar, extendedVar);
+			solver.add(b);
+		}
+	}
+
 	private static void getNewLhsOfLenCons(List<Map<String, Integer>> newLhsOfLenCons,
 			List<Map<String, Integer>> oldLhsOfLenCons, Map<String, ArrayList<String>> variables_split) {
 		// TODO Auto-generated method stub
