@@ -256,8 +256,62 @@ public class DemoProgramStr {
 		addSplitVariablesToSolver(oldLengthVariables, newLengthVariables, u_variables_split, context, solver);
 		addfixedVariablesToSolver(fixedVars, newLengthVariables, context, solver);
 		System.out.println("solver = " + solver.toString());
+		preprocessVars(fixedVars);
 	}
 	
+	private static void preprocessVars(Map<String, HashSet<String>> fixedVars) {
+		// TODO Auto-generated method stub
+		int count = 0;
+		Map<String, Integer> equalVarsMap = new HashMap<String, Integer> ();
+		for(String key: fixedVars.keySet()) {
+			HashSet<String> values = fixedVars.get(key);
+			if (equalVarsMap.keySet().contains(key)) {
+				int val = equalVarsMap.get(key);
+				for (String v: values) {
+					equalVarsMap.put(v, val);					
+				}
+			}
+			else {
+				boolean b = false;
+				int val = 0;
+				for (String v: values) {
+					if (equalVarsMap.keySet().contains(v)) {
+						val = equalVarsMap.get(v);
+						b = true;
+						break;
+					}					
+				}
+				if (b) {
+					equalVarsMap.put(key, val);
+					for (String v: values) {
+						equalVarsMap.put(v, val);						
+					}
+				}
+				else {
+					count = count + 1;
+					equalVarsMap.put(key, count);
+					for (String v: values) {
+						equalVarsMap.put(v, count);						
+					}
+				}
+			}
+		}
+		Map<Integer, HashSet<String>> equalVarsClusters = new HashMap<Integer, HashSet<String>> ();
+		for (String s: equalVarsMap.keySet()) {
+			int groupId = equalVarsMap.get(s);
+			if (equalVarsClusters.containsKey(groupId)) {
+				equalVarsClusters.get(groupId).add(s);
+			}
+			else {
+				HashSet<String> equalVarsSet = new HashSet<String> ();
+				equalVarsSet.add(s);
+				equalVarsClusters.put(groupId, equalVarsSet);
+			}
+		}
+		System.out.println("equalVarsMap = " + equalVarsMap);
+		System.out.println("equalVarsClusters = " + equalVarsClusters);
+	}
+
 	private static void addfixedVariablesToSolver(Map<String, HashSet<String>> fixedVars,
 			Map<String, IntExpr> newLengthVariables, Context context, Solver solver) {
 		// TODO Auto-generated method stub
