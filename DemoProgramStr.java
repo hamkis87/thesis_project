@@ -176,6 +176,7 @@ public class DemoProgramStr {
 		// u_variables[i] is split into a number of variables. This number is u_variables_split_count[i]
 		ArrayList<Integer> u_variables_split_count = new ArrayList<Integer> ();
 		Map<String, ArrayList<String> > u_variables_split = new HashMap<String, ArrayList<String> > ();
+		Map<String, ArrayList<String> > u_variables_split2 = new HashMap<String, ArrayList<String> > ();
 		ArrayList<String> extended_variables = new ArrayList<String> ();
 		System.out.println("u_variables: " + u_variables_);
 		ArrayList<ArrayList<Integer>> lengthPermutations = new ArrayList<ArrayList<Integer>> ();
@@ -238,6 +239,7 @@ public class DemoProgramStr {
 			fixVariables(fixedVars, splitLhsEqDeqConsI, splitRhsEqDeqConsI);	
 		}
 		System.out.println("fixedVars: " + fixedVars);
+		preprocessVars(fixedVars, u_variables_split, u_variables_split2);
 		//System.out.println("Permutations: " + getPermutations(2,2));
 		// In newLhsOfMemCons, variables are substituted according to u_variables_split
 		ArrayList<ArrayList<String>> newLhsOfMemCons = new ArrayList<ArrayList<String>> ();
@@ -255,11 +257,10 @@ public class DemoProgramStr {
 				newLengthVariables, context, solver);
 		addSplitVariablesToSolver(oldLengthVariables, newLengthVariables, u_variables_split, context, solver);
 		addfixedVariablesToSolver(fixedVars, newLengthVariables, context, solver);
-		System.out.println("solver = " + solver.toString());
-		preprocessVars(fixedVars);
+		//System.out.println("solver = " + solver.toString());
 	}
 	
-	private static void preprocessVars(Map<String, HashSet<String>> fixedVars) {
+	private static void preprocessVars(Map<String, HashSet<String>> fixedVars, Map<String, ArrayList<String>> u_variables_split1, Map<String, ArrayList<String>> u_variables_split2) {
 		// TODO Auto-generated method stub
 		int count = 0;
 		Map<String, Integer> equalVarsMap = new HashMap<String, Integer> ();
@@ -295,21 +296,50 @@ public class DemoProgramStr {
 					}
 				}
 			}
-		}
-		Map<Integer, HashSet<String>> equalVarsClusters = new HashMap<Integer, HashSet<String>> ();
+		} 
+		Map<Integer, TreeSet<String>> equalVarsClusters = new HashMap<Integer, TreeSet<String>> ();
 		for (String s: equalVarsMap.keySet()) {
 			int groupId = equalVarsMap.get(s);
 			if (equalVarsClusters.containsKey(groupId)) {
 				equalVarsClusters.get(groupId).add(s);
 			}
 			else {
-				HashSet<String> equalVarsSet = new HashSet<String> ();
+				TreeSet<String> equalVarsSet = new TreeSet<String> ();
 				equalVarsSet.add(s);
 				equalVarsClusters.put(groupId, equalVarsSet);
 			}
 		}
 		System.out.println("equalVarsMap = " + equalVarsMap);
 		System.out.println("equalVarsClusters = " + equalVarsClusters);
+		Map<Integer, String> equalVarsMap2 = new HashMap<Integer, String> ();
+		for (Integer key: equalVarsClusters.keySet()) {
+			TreeSet<String> equalVarsSet = equalVarsClusters.get(key);
+			if (equalVarsSet.contains("EPSILON")) {
+				equalVarsMap2.put(key, "EPSILON");								
+			}
+			else {
+				equalVarsMap2.put(key, equalVarsSet.last());								
+			}
+		}
+		System.out.println("equalVarsMap2 = " + equalVarsMap2);
+		for (String s: u_variables_split1.keySet()) {
+			ArrayList<String> s_split_into1 = u_variables_split1.get(s);
+			ArrayList<String> s_split_into2 = new ArrayList<String> ();
+			for (int i = 0; i < s_split_into1.size(); i++) {
+				String v1 = s_split_into1.get(i);
+				if (equalVarsMap.containsKey(v1)) {
+					String v2 = equalVarsMap2.get(equalVarsMap.get(v1));
+					if (!v2.equals("EPSILON")) {
+						s_split_into2.add(v2);						
+					}
+				}
+				else {
+					s_split_into2.add(v1);					
+				}
+				u_variables_split2.put(s, s_split_into2);
+			}
+		}
+		System.out.println("u_variables_split2 = " + u_variables_split2);		
 	}
 
 	private static void addfixedVariablesToSolver(Map<String, HashSet<String>> fixedVars,
