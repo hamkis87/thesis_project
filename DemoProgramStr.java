@@ -82,7 +82,7 @@ public class DemoProgramStr {
 			System.out.println("lengthVariables_ = " + lengthVariables_);
 			addLengthConstraintsToSolver_(lhsOfLenCons_, relLhs2RhsOfLenCons, rhsOfLenCons, 
 					                     lengthVariables_, context, solver);
-			System.out.println("solver after adding length constraints= " + solver.toString());
+			//System.out.println("solver after adding length constraints= " + solver.toString());
 			//Status st = solver.check();
 			// if length constraints alone are satisfiable, we check the membership constraints
 			if (solver.check().equals(Status.SATISFIABLE)) {
@@ -92,13 +92,15 @@ public class DemoProgramStr {
 				//solver.push();
 				int nextSatIntegerArithDisjId_;
 				boolean stopFlag = false;
-				while (!stopFlag) {
+				//while (!stopFlag) {
 					nextSatIntegerArithDisjId_ = getNextSatIntegerArithDisjId_(refinedIntegerArithDnf_, 
 		                    lengthVariables_, variables_, context, solver, 
 		                    previousSatIntegerArithDisjId);
 					if (previousSatIntegerArithDisjId < refinedIntegerArithDnf_.size()) {
 						System.out.println("nextSatIntegerArithDisjId_ = " + nextSatIntegerArithDisjId_);
 						System.out.println("solver after adding membership constraints= " + solver.toString());						
+						Model model = solver.getModel();
+						System.out.println(model.toString());
 						underApproximation_(variables_, 
 					            lhsEqDeqCons_, 
 					            relLhs2RhsOfEqDeqCons, 
@@ -119,7 +121,7 @@ public class DemoProgramStr {
 					
 					
 					previousSatIntegerArithDisjId = nextSatIntegerArithDisjId_;					
-				}
+				//}
 				
 				//solver.pop();
 				
@@ -192,13 +194,9 @@ public class DemoProgramStr {
 		Map<String, ArrayList<String> > u_variables_split2 = new HashMap<String, ArrayList<String> > ();
 		ArrayList<String> extended_variables = new ArrayList<String> ();
 		System.out.println("u_variables: " + u_variables_);
-		ArrayList<ArrayList<Integer>> lengthPermutations = new ArrayList<ArrayList<Integer>> ();
-		int K_parameter = 5;
-		for (ArrayList<Integer> permutation: getPermutations(K_parameter, u_variables_.size())) {
-			List<Integer> lengthPermutation = permutation.stream().map(number -> number + 1). 
-			        collect(Collectors.toList());
-			lengthPermutations.add((ArrayList<Integer>) lengthPermutation);			
-		}
+		int K_parameter = 3;
+		ArrayList<ArrayList<Integer>> lengthPermutations = 
+				getPermutations2(K_parameter, u_variables_.size());
 		System.out.println("lengthPermutations: " + lengthPermutations);
 		u_variables_split_count = lengthPermutations.get(7);
 		System.out.println("u_variables_split_count: " + u_variables_split_count);
@@ -337,21 +335,27 @@ public class DemoProgramStr {
 			}
 		}
 		System.out.println("equalVarsMap2 = " + equalVarsMap2);
+		System.out.println("u_variables_split1 = " + u_variables_split1);
 		for (String s: u_variables_split1.keySet()) {
 			ArrayList<String> s_split_into1 = u_variables_split1.get(s);
 			ArrayList<String> s_split_into2 = new ArrayList<String> ();
-			for (int i = 0; i < s_split_into1.size(); i++) {
-				String v1 = s_split_into1.get(i);
-				if (equalVarsMap.containsKey(v1)) {
-					String v2 = equalVarsMap2.get(equalVarsMap.get(v1));
-					if (!v2.equals("EPSILON")) {
-						s_split_into2.add(v2);						
+			if (s_split_into1.size() == 0) {
+				u_variables_split2.put(s, s_split_into2);				
+			}
+			else {
+				for (int i = 0; i < s_split_into1.size(); i++) {
+					String v1 = s_split_into1.get(i);
+					if (equalVarsMap.containsKey(v1)) {
+						String v2 = equalVarsMap2.get(equalVarsMap.get(v1));
+						if (!v2.equals("EPSILON")) {
+							s_split_into2.add(v2);						
+						}
 					}
+					else {
+						s_split_into2.add(v1);					
+					}
+					u_variables_split2.put(s, s_split_into2);
 				}
-				else {
-					s_split_into2.add(v1);					
-				}
-				u_variables_split2.put(s, s_split_into2);
 			}
 		}
 		System.out.println("u_variables_split2 = " + u_variables_split2);		
@@ -412,6 +416,8 @@ public class DemoProgramStr {
 			ArrayList<String> oldLhsCons = oldLhsOfMemCons.get(i);
 			ArrayList<String> newLhsCons = new ArrayList<String> ();
 			for (int j = 0; j < oldLhsCons.size(); j++) {
+				//System.out.println("test1: " + oldLhsCons.get(j));
+				//System.out.println("test2: " + variables_split.get(oldLhsCons.get(j)));
 				newLhsCons.addAll(variables_split.get(oldLhsCons.get(j)));				
 			}
 			newLhsOfMemCons.add(newLhsCons);
@@ -1278,6 +1284,36 @@ public class DemoProgramStr {
 			}
 			int k = j - 1;
 			while(k >= 0 && permutation.get(k) == numOfStates -1) {
+				permutation.set(k, 0);
+				k = k - 1;
+			}
+			if (k >= 0) {
+				int at_k = permutation.get(k);
+				permutation.set(k, at_k + 1);				
+			}
+			else 
+				break;
+		}
+		return permutations;
+	}
+	
+	public static ArrayList<ArrayList<Integer> > getPermutations2(int numOfStates, int size) {
+		ArrayList<ArrayList<Integer> > permutations = new ArrayList<ArrayList<Integer> >();
+		ArrayList<Integer> permutation = new ArrayList<Integer>();
+		for (int i = 0; i < size; i++) {
+			permutation.add(0);
+		}
+		int j = size - 1;
+		while(true) {
+			for(int i = 0; i <= numOfStates; i++) {
+				permutation.set(j, i);
+				//System.out.println(permutation.toString());
+				ArrayList<Integer> permutationCopy = new ArrayList<>(permutation);
+				permutations.add(permutationCopy);
+				//System.out.println(result.toString());
+			}
+			int k = j - 1;
+			while(k >= 0 && permutation.get(k) == numOfStates) {
 				permutation.set(k, 0);
 				k = k - 1;
 			}
