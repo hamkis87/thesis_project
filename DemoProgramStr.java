@@ -92,45 +92,76 @@ public class DemoProgramStr {
 				//solver.push();
 				int nextSatIntegerArithDisjId_;
 				boolean stopFlag = false;
-				//while (!stopFlag) {
+				while (!stopFlag) {
 					nextSatIntegerArithDisjId_ = getNextSatIntegerArithDisjId_(refinedIntegerArithDnf_, 
 		                    lengthVariables_, variables_, context, solver, 
 		                    previousSatIntegerArithDisjId);
 					if (previousSatIntegerArithDisjId < refinedIntegerArithDnf_.size()) {
 						System.out.println("nextSatIntegerArithDisjId_ = " + nextSatIntegerArithDisjId_);
-						System.out.println("solver after adding membership constraints= " + solver.toString());						
-						Model model = solver.getModel();
-						System.out.println(model.toString());
-						underApproximation_(variables_, 
-					            lhsEqDeqCons_, 
-					            relLhs2RhsOfEqDeqCons, 
-					            rhsEqDeqCons_,
-					            lhsOfMemCons_, 
-					            rhsOfMemCons,
-					            lhsOfLenCons_, 
-					            relLhs2RhsOfLenCons, 
-					            rhsOfLenCons,
-					            lengthVariables_,
-					            context,
-					            solver);
+						while (solver.check().equals(Status.SATISFIABLE)) {
+							System.out.println("solver after adding membership constraints= " + solver.toString());						
+							Model model = solver.getModel();
+							System.out.println(model.toString());
+							String maxLenVar = getMaxLenVar(lengthVariables_, model);
+							Expr maxLenVar_expr = model.getConstInterp(lengthVariables_.get(maxLenVar));
+							String maxLenVar_str = maxLenVar_expr.toString();	
+							int maxLenVar_int = Integer.parseInt(maxLenVar_str);
+							//System.out.println("max len var is " + maxLenVar + " with length of " + maxLenVar_int);
+							boolean solution_found = underApproximation_(variables_, 
+						            lhsEqDeqCons_, 
+						            relLhs2RhsOfEqDeqCons, 
+						            rhsEqDeqCons_,
+						            lhsOfMemCons_, 
+						            rhsOfMemCons,
+						            lhsOfLenCons_, 
+						            relLhs2RhsOfLenCons, 
+						            rhsOfLenCons,
+						            lengthVariables_,
+						            maxLenVar_int,
+						            context,
+						            solver);
+							if (solution_found) {
+								stopFlag = true;
+								break;							
+							}
+							else {
+								BoolExpr underApproxConstraint = 
+										 context.mkGt(
+												 lengthVariables_.get(maxLenVar), 
+												 (IntExpr)maxLenVar_expr
+										             );
+								solver.add(underApproxConstraint);
+							}														
+						}	
 					}
 					else {
 						stopFlag = true;
-					}
-
-					
-					
+					}					
 					previousSatIntegerArithDisjId = nextSatIntegerArithDisjId_;					
-				//}
+				}
 				
 				//solver.pop();
-				
-				
-				
 			}
 			
 		}
 		
+	}
+
+	private static String getMaxLenVar(Map<String, IntExpr> lengthVariables, Model model) {
+		// TODO Auto-generated method stub
+		String result = "";
+		int max_len = -1;
+		for (String var:lengthVariables.keySet()) {
+			Expr var_expr = model.getConstInterp(lengthVariables.get(var));
+			String var_str = var_expr.toString();	
+			int var_int = Integer.parseInt(var_str);
+			if (var_int > max_len) {
+				max_len = var_int;
+				result = var;
+			}
+		}
+		//System.out.println("max len var is " + result + " with length of " + max_len);
+		return result;
 	}
 
 	private static void getMemConstraints(ArrayList<ArrayList<String>> lhsOfMemCons,
@@ -176,8 +207,8 @@ public class DemoProgramStr {
 		//rhsOfMemCons.add(rhsOfMemCons5);
 	}
 
-	private static void underApproximation_(ArrayList<String> u_variables_, ArrayList<ArrayList<String>> lhsEqDeqCons_,
-			List<EqualityRelation> relLhs2RhsOfEqDeqCons, ArrayList<ArrayList<String>> rhsEqDeqCons_, ArrayList<ArrayList<String>> lhsOfMemCons_, List<Automaton> rhsOfMemCons, List<Map<String, Integer>> lhsOfLenCons_, List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons, Map<String, IntExpr> oldLengthVariables, Context context, Solver solver) {
+	private static boolean underApproximation_(ArrayList<String> u_variables_, ArrayList<ArrayList<String>> lhsEqDeqCons_,
+			List<EqualityRelation> relLhs2RhsOfEqDeqCons, ArrayList<ArrayList<String>> rhsEqDeqCons_, ArrayList<ArrayList<String>> lhsOfMemCons_, List<Automaton> rhsOfMemCons, List<Map<String, Integer>> lhsOfLenCons_, List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons, Map<String, IntExpr> oldLengthVariables, int maxLenVar_int, Context context, Solver solver) {
 		// TODO Auto-generated method stub
 		System.out.println("****************************************************************");
 		System.out.println("****************************************************************");
@@ -194,83 +225,105 @@ public class DemoProgramStr {
 		Map<String, ArrayList<String> > u_variables_split2 = new HashMap<String, ArrayList<String> > ();
 		ArrayList<String> extended_variables = new ArrayList<String> ();
 		System.out.println("u_variables: " + u_variables_);
-		int K_parameter = 3;
+		//int K_parameter = 3;
+		boolean solution_found = false;
 		ArrayList<ArrayList<Integer>> lengthPermutations = 
-				getPermutations2(K_parameter, u_variables_.size());
+				getPermutations2(maxLenVar_int, u_variables_.size());
 		System.out.println("lengthPermutations: " + lengthPermutations);
-		u_variables_split_count = lengthPermutations.get(7);
-		System.out.println("u_variables_split_count: " + u_variables_split_count);
-		for (int i = 0; i < u_variables_.size(); i++) {
-			String c = u_variables_.get(i);
-			int split_count = u_variables_split_count.get(i);
-			ArrayList<String> c_split_into = new ArrayList<String> ();
-			for (int j = 1; j <= split_count; j++) {
-				c_split_into.add(c + j);				
-			}
-			extended_variables.addAll(c_split_into);
-			u_variables_split.put(c, c_split_into);
-		}
-		System.out.println("u_variables_split: " + u_variables_split);
-		System.out.println("extended_variables: " + extended_variables);
-		// fixedVars should contain the value(s) for each variable,
-		// for example fixedVars[x1] = {y2,z3} means that x1 = y2 and x1 = z3
-		// fixedVars[x] = {.., x, ..} is not allowed
-		Map<String, HashSet<String> > fixedVars = new HashMap<String, HashSet<String> > ();
-		for (String c: u_variables_) {
-			for (String s: u_variables_split.get(c) ) {
-				HashSet<String> s_values = new HashSet<String> ();
-				fixedVars.put(s, s_values);					
-			}		
-		}
-		//System.out.println("fixedVars: " + fixedVars);
-		//System.out.println("fixedVars size: " + fixedVars.size());
-		for (int id = 0; id < lhsEqDeqCons_.size(); id++) {
-			// each variable is expressed by its split variables,
-			// i.e x = u_variables[i] is written as u_variables_split[x]
-			ArrayList<String> splitLhsEqDeqConsI = new ArrayList<String> ();
-			ArrayList<String> splitRhsEqDeqConsI = new ArrayList<String> ();
-			ArrayList<String> lhsEqDeqConsI = lhsEqDeqCons_.get(id);
-			ArrayList<String> rhsEqDeqConsI = rhsEqDeqCons_.get(id);
-			for (int i = 0; i < lhsEqDeqConsI.size(); i++) {
-				String c = lhsEqDeqConsI.get(i);
-				ArrayList<String> c_split = u_variables_split.get(c);
-				for (int j = 0; j < c_split.size(); j++) {
-					splitLhsEqDeqConsI.add(c_split.get(j));				
+		//u_variables_split_count = lengthPermutations.get(7);
+		for (int uid = 0; uid < lengthPermutations.size(); uid++) {
+			u_variables_split_count = lengthPermutations.get(uid);
+			System.out.println("u_variables_split_count: " + u_variables_split_count);
+			for (int i = 0; i < u_variables_.size(); i++) {
+				String c = u_variables_.get(i);
+				int split_count = u_variables_split_count.get(i);
+				ArrayList<String> c_split_into = new ArrayList<String> ();
+				for (int j = 1; j <= split_count; j++) {
+					c_split_into.add(c + j);				
 				}
+				extended_variables.addAll(c_split_into);
+				u_variables_split.put(c, c_split_into);
 			}
-			for (int i = 0; i < rhsEqDeqConsI.size(); i++) {
-				String c = rhsEqDeqConsI.get(i);
-				ArrayList<String> c_split = u_variables_split.get(c);
-				for (int j = 0; j < c_split.size(); j++) {
-					splitRhsEqDeqConsI.add(c_split.get(j));				
+			System.out.println("u_variables_split: " + u_variables_split);
+			System.out.println("extended_variables: " + extended_variables);
+			// fixedVars should contain the value(s) for each variable,
+			// for example fixedVars[x1] = {y2,z3} means that x1 = y2 and x1 = z3
+			// fixedVars[x] = {.., x, ..} is not allowed
+			Map<String, HashSet<String> > fixedVars = new HashMap<String, HashSet<String> > ();
+			for (String c: u_variables_) {
+				for (String s: u_variables_split.get(c) ) {
+					HashSet<String> s_values = new HashSet<String> ();
+					fixedVars.put(s, s_values);					
+				}		
+			}
+			//System.out.println("fixedVars: " + fixedVars);
+			//System.out.println("fixedVars size: " + fixedVars.size());
+			for (int id = 0; id < lhsEqDeqCons_.size(); id++) {
+				// each variable is expressed by its split variables,
+				// i.e x = u_variables[i] is written as u_variables_split[x]
+				ArrayList<String> splitLhsEqDeqConsI = new ArrayList<String> ();
+				ArrayList<String> splitRhsEqDeqConsI = new ArrayList<String> ();
+				ArrayList<String> lhsEqDeqConsI = lhsEqDeqCons_.get(id);
+				ArrayList<String> rhsEqDeqConsI = rhsEqDeqCons_.get(id);
+				for (int i = 0; i < lhsEqDeqConsI.size(); i++) {
+					String c = lhsEqDeqConsI.get(i);
+					ArrayList<String> c_split = u_variables_split.get(c);
+					for (int j = 0; j < c_split.size(); j++) {
+						splitLhsEqDeqConsI.add(c_split.get(j));				
+					}
 				}
+				for (int i = 0; i < rhsEqDeqConsI.size(); i++) {
+					String c = rhsEqDeqConsI.get(i);
+					ArrayList<String> c_split = u_variables_split.get(c);
+					for (int j = 0; j < c_split.size(); j++) {
+						splitRhsEqDeqConsI.add(c_split.get(j));				
+					}
+				}
+				//System.out.println("splitLhsEqDeqConsI: " + splitLhsEqDeqConsI);
+				//System.out.println("splitRhsEqDeqConsI: " + splitRhsEqDeqConsI);
+				fixVariables(fixedVars, splitLhsEqDeqConsI, splitRhsEqDeqConsI);	
 			}
-			//System.out.println("splitLhsEqDeqConsI: " + splitLhsEqDeqConsI);
-			//System.out.println("splitRhsEqDeqConsI: " + splitRhsEqDeqConsI);
-			fixVariables(fixedVars, splitLhsEqDeqConsI, splitRhsEqDeqConsI);	
+			System.out.println("fixedVars: " + fixedVars);
+			preprocessVars(fixedVars, u_variables_split, u_variables_split2);
+			//System.out.println("Permutations: " + getPermutations(2,2));
+			// In newLhsOfMemCons, variables are substituted according to u_variables_split
+			ArrayList<ArrayList<String>> newLhsOfMemCons = new ArrayList<ArrayList<String>> ();
+			getNewLhsOfMemCons(newLhsOfMemCons, lhsOfMemCons_, u_variables_split2);
+			System.out.println("lhsOfMemCons_: " + lhsOfMemCons_);
+			System.out.println("newLhsOfMemCons: " + newLhsOfMemCons);
+			// ArrayList<ArrayList<String>> lhsOfLenCons_, List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons
+			List<Map<String, Integer>>  newlhsOfLenCons = new ArrayList<Map<String, Integer>> ();
+			getNewLhsOfLenCons(newlhsOfLenCons, lhsOfLenCons_, u_variables_split2);
+			System.out.println("lhsOfLenCons_: " + lhsOfLenCons_);
+			System.out.println("newlhsOfLenCons: " + newlhsOfLenCons);
+			Map<String, IntExpr> newLengthVariables = makeLengthVariables_(context, extended_variables);
+			System.out.println("newLengthVariables: " + newLengthVariables);
+			solver.push();
+			addLengthConstraintsToSolver_(newlhsOfLenCons, relLhs2RhsOfLenCons, rhsOfLenCons, 
+					newLengthVariables, context, solver);
+			addSplitVariablesToSolver(oldLengthVariables, newLengthVariables, u_variables_split2, context, solver);
+			
+			// no need foraddfixedVariablesToSolver
+			//addfixedVariablesToSolver(fixedVars, newLengthVariables, context, solver);
+			//System.out.println("solver = " + solver.toString());
+			if (solver.check().equals(Status.SATISFIABLE)) {
+				solution_found = true;
+				System.out.println("The under-approximation found a solution");
+				System.out.println("in the " + (uid + 1) + " / " + lengthPermutations.size() + " attempt.");
+				Model model = solver.getModel();
+				System.out.println(model.toString());
+				//solver.pop();
+				break;
+			}
+			else {
+				solver.pop();				
+			}
 		}
-		System.out.println("fixedVars: " + fixedVars);
-		preprocessVars(fixedVars, u_variables_split, u_variables_split2);
-		//System.out.println("Permutations: " + getPermutations(2,2));
-		// In newLhsOfMemCons, variables are substituted according to u_variables_split
-		ArrayList<ArrayList<String>> newLhsOfMemCons = new ArrayList<ArrayList<String>> ();
-		getNewLhsOfMemCons(newLhsOfMemCons, lhsOfMemCons_, u_variables_split2);
-		System.out.println("lhsOfMemCons_: " + lhsOfMemCons_);
-		System.out.println("newLhsOfMemCons: " + newLhsOfMemCons);
-		// ArrayList<ArrayList<String>> lhsOfLenCons_, List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons
-		List<Map<String, Integer>>  newlhsOfLenCons = new ArrayList<Map<String, Integer>> ();
-		getNewLhsOfLenCons(newlhsOfLenCons, lhsOfLenCons_, u_variables_split2);
-		System.out.println("lhsOfLenCons_: " + lhsOfLenCons_);
-		System.out.println("newlhsOfLenCons: " + newlhsOfLenCons);
-		Map<String, IntExpr> newLengthVariables = makeLengthVariables_(context, extended_variables);
-		System.out.println("newLengthVariables: " + newLengthVariables);
-		addLengthConstraintsToSolver_(newlhsOfLenCons, relLhs2RhsOfLenCons, rhsOfLenCons, 
-				newLengthVariables, context, solver);
-		addSplitVariablesToSolver(oldLengthVariables, newLengthVariables, u_variables_split2, context, solver);
-		
-		// no need foraddfixedVariablesToSolver
-		//addfixedVariablesToSolver(fixedVars, newLengthVariables, context, solver);
-		System.out.println("solver = " + solver.toString());
+		if (!solution_found) {
+			System.out.print("under-approximation has not found a solution");	
+			System.out.println("out of the " + lengthPermutations.size() + " alternatives");	
+		}
+		return solution_found;
 	}
 	
 	private static void preprocessVars(Map<String, HashSet<String>> fixedVars, Map<String, ArrayList<String>> u_variables_split1, Map<String, ArrayList<String>> u_variables_split2) {
