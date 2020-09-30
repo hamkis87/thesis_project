@@ -92,7 +92,13 @@ public class DemoProgramStr {
 				//solver.push();
 				int nextSatIntegerArithDisjId_;
 				boolean stopFlag = false;
+				boolean solution_found = false;
 				while (!stopFlag) {
+					// if we already pushed a disjunct of membership constraints, we need to pop 
+					// them before we push the next disjunct
+					if (previousSatIntegerArithDisjId > -1) {
+						solver.pop();
+					}
 					nextSatIntegerArithDisjId_ = getNextSatIntegerArithDisjId_(refinedIntegerArithDnf_, 
 		                    lengthVariables_, variables_, context, solver, 
 		                    previousSatIntegerArithDisjId);
@@ -107,7 +113,7 @@ public class DemoProgramStr {
 							String maxLenVar_str = maxLenVar_expr.toString();	
 							int maxLenVar_int = Integer.parseInt(maxLenVar_str);
 							//System.out.println("max len var is " + maxLenVar + " with length of " + maxLenVar_int);
-							boolean solution_found = underApproximation_(variables_, 
+							solution_found = underApproximation_(variables_, 
 						            lhsEqDeqCons_, 
 						            relLhs2RhsOfEqDeqCons, 
 						            rhsEqDeqCons_,
