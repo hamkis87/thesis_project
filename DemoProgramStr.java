@@ -108,7 +108,8 @@ public class DemoProgramStr {
 							System.out.println("solver after adding membership constraints= " + solver.toString());						
 							Model model = solver.getModel();
 							System.out.println(model.toString());
-							String maxLenVar = getMaxLenVar(lengthVariables_, model);
+							String maxLenVar = getMaxLenVar(
+									lengthVariables_, model);
 							Expr maxLenVar_expr = model.getConstInterp(lengthVariables_.get(maxLenVar));
 							String maxLenVar_str = maxLenVar_expr.toString();	
 							int maxLenVar_int = Integer.parseInt(maxLenVar_str);
@@ -229,7 +230,8 @@ public class DemoProgramStr {
 		ArrayList<Integer> u_variables_split_count = new ArrayList<Integer> ();
 		Map<String, ArrayList<String> > u_variables_split = new HashMap<String, ArrayList<String> > ();
 		Map<String, ArrayList<String> > u_variables_split2 = new HashMap<String, ArrayList<String> > ();
-		ArrayList<String> extended_variables = new ArrayList<String> ();
+		//ArrayList<String> extended_variables = new ArrayList<String> ();
+		ArrayList<String> extended_variables;
 		System.out.println("u_variables: " + u_variables_);
 		//int K_parameter = 3;
 		boolean solution_found = false;
@@ -238,6 +240,7 @@ public class DemoProgramStr {
 		System.out.println("lengthPermutations: " + lengthPermutations);
 		//u_variables_split_count = lengthPermutations.get(7);
 		for (int uid = 0; uid < lengthPermutations.size(); uid++) {
+			extended_variables = new ArrayList<String> ();
 			u_variables_split_count = lengthPermutations.get(uid);
 			System.out.println("u_variables_split_count: " + u_variables_split_count);
 			for (int i = 0; i < u_variables_.size(); i++) {
