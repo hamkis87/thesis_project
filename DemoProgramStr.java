@@ -265,6 +265,7 @@ public class DemoProgramStr {
 					fixedVars.put(s, s_values);					
 				}		
 			}
+			
 			//System.out.println("fixedVars: " + fixedVars);
 			//System.out.println("fixedVars size: " + fixedVars.size());
 			for (int id = 0; id < lhsEqDeqCons_.size(); id++) {
@@ -310,7 +311,7 @@ public class DemoProgramStr {
 			solver.push();
 			addLengthConstraintsToSolver_(newlhsOfLenCons, relLhs2RhsOfLenCons, rhsOfLenCons, 
 					newLengthVariables, context, solver);
-			addSplitVariablesToSolver(oldLengthVariables, newLengthVariables, u_variables_split2, context, solver);
+			addSplitVariablesToSolver(oldLengthVariables, newLengthVariables, u_variables_split, u_variables_split2, context, solver);
 			
 			// no need foraddfixedVariablesToSolver
 			//addfixedVariablesToSolver(fixedVars, newLengthVariables, context, solver);
@@ -442,15 +443,30 @@ public class DemoProgramStr {
 //	}
 
 	private static void addSplitVariablesToSolver(Map<String, IntExpr> oldLengthVariables,
-			Map<String, IntExpr> newLengthVariables, Map<String, ArrayList<String>> variables_split, Context context, Solver solver) {
+			Map<String, IntExpr> newLengthVariables, Map<String, ArrayList<String>> variables_split1, Map<String, ArrayList<String>> variables_split2, Context context, Solver solver) {
 		// TODO Auto-generated method stub
-		for (String leftVar: variables_split.keySet()) {
+		System.out.println("oldLengthVariables = " + oldLengthVariables);
+		System.out.println("newLengthVariables = " + newLengthVariables);
+		System.out.println("variables_split1 = " + variables_split1);
+		System.out.println("variables_split2 = " + variables_split2);
+		for (String leftVar: variables_split1.keySet()) {
 			IntExpr oldVar = oldLengthVariables.get(leftVar);
 			IntExpr extendedVar = context.mkInt(0);			
-			for (String rightVar: variables_split.get(leftVar)) {
+			for (String rightVar: variables_split1.get(leftVar)) {
 				extendedVar = (IntExpr) context.mkAdd(newLengthVariables.get(rightVar), extendedVar);												
 			}
 			BoolExpr b = context.mkEq(oldVar, extendedVar);
+			System.out.println("b = " + b);
+			solver.add(b);
+		}
+		for (String leftVar: variables_split2.keySet()) {
+			IntExpr oldVar = oldLengthVariables.get(leftVar);
+			IntExpr extendedVar = context.mkInt(0);			
+			for (String rightVar: variables_split2.get(leftVar)) {
+				extendedVar = (IntExpr) context.mkAdd(newLengthVariables.get(rightVar), extendedVar);												
+			}
+			BoolExpr b = context.mkEq(oldVar, extendedVar);
+			System.out.println("b = " + b);
 			solver.add(b);
 		}
 	}
