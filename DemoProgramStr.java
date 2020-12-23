@@ -132,11 +132,18 @@ public class DemoProgramStr {
 								break;							
 							}
 							else {
-								BoolExpr underApproxConstraint = 
-										 context.mkGt(
-												 lengthVariables_.get(maxLenVar), 
-												 (IntExpr)maxLenVar_expr
-										             );
+//								BoolExpr underApproxConstraint = 
+//										 context.mkGt(
+//												 lengthVariables_.get(maxLenVar), 
+//												 (IntExpr)maxLenVar_expr
+//										             );
+//								solver.add(underApproxConstraint);
+								BoolExpr underApproxConstraint = context.mkBool(false);
+								for (String k: lengthVariables_.keySet()) {
+									IntExpr k_var = lengthVariables_.get(k);
+									BoolExpr under_temp = context.mkGt(k_var, (IntExpr)maxLenVar_expr);
+									underApproxConstraint = context.mkOr(underApproxConstraint, under_temp);
+								}
 								solver.add(underApproxConstraint);
 							}														
 						}	
