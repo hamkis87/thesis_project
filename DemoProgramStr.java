@@ -325,10 +325,11 @@ public class DemoProgramStr {
 			//System.out.println("solver = " + solver.toString());
 			if (solver.check().equals(Status.SATISFIABLE)) {
 				solution_found = true;
-				System.out.println("The under-approximation found a solution");
+				System.out.println("The under-approximation found a solution for length constraints");
 				System.out.println("in the " + (uid + 1) + " / " + lengthPermutations.size() + " attempt.");
 				Model model = solver.getModel();
 				System.out.println(model.toString());
+				//addMemConstraintsToSolver_(newLhsOfMemCons, rhsOfMemCons, newLengthVariables, context, solver);
 				//solver.pop();
 				break;
 			}
@@ -343,6 +344,16 @@ public class DemoProgramStr {
 		return solution_found;
 	}
 	
+	private static void addMemConstraintsToSolver_(ArrayList<ArrayList<String>> newLhsOfMemCons,
+			List<Automaton> rhsOfMemCons, Map<String, IntExpr> newLengthVariables, Context context, Solver solver) {
+		// TODO Auto-generated method stub
+		ArrayList<ArrayList<Map<Integer, Integer> > > refinedIntegerArithDnf_ =
+				new ArrayList<ArrayList<Map<Integer, Integer> > > ();
+		ArrayList<String> variables_ = new ArrayList<String> ();
+		//processMembershipConstraints_(variables_, refinedIntegerArithDnf_, lhsOfMemCons_, rhsOfMemCons);
+		
+	}
+
 	private static void preprocessVars(Map<String, HashSet<String>> fixedVars, Map<String, ArrayList<String>> u_variables_split1, Map<String, ArrayList<String>> u_variables_split2) {
 		// TODO Auto-generated method stub
 		int count = 0;
