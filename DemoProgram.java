@@ -16,40 +16,25 @@ import java.io.*;
 public class DemoProgram {
 
 	public static void main(String[] args) {
+		int noOfConjuncts = 1;
 		ArrayList<ArrayList<String>> lhsOfMemCons = new ArrayList<ArrayList<String>> () ;
 		List<Automaton> rhsOfMemCons = new ArrayList<Automaton> ();
 		List<Map<String, Integer>> lhsOfLenCons_ = new ArrayList<Map<String, Integer>> ();
 		List<Integer> rhsOfLenCons = new ArrayList<Integer> ();
 		List<IntegerRelation> relLhs2RhsOfLenCons = new ArrayList<IntegerRelation> ();
+		ArrayList<ArrayList<String>> lhsEqDeqCons_ = new ArrayList<ArrayList<String>> ();
+		ArrayList<ArrayList<String>> rhsEqDeqCons_ = new ArrayList<ArrayList<String>> ();
+		List<EqualityRelation> relLhs2RhsOfEqDeqCons = new ArrayList<EqualityRelation> ();
 		try {
             //opening file for reading in Java
             String file = "/home/hamid/eclipse-workspace/DemoProject/src/test.txt";
             BufferedReader reader = new BufferedReader(new FileReader(file));
+            noOfConjuncts = getNumOfConjuncts(reader);
+            System.out.println("Noofconj = " + noOfConjuncts);
             getMemConstraints(reader, lhsOfMemCons, rhsOfMemCons);
             getLengthConstraints_(reader, lhsOfLenCons_, relLhs2RhsOfLenCons, rhsOfLenCons);
-            //System.out.println("lhsOfMemCons " + lhsOfMemCons);
-	        //System.out.println("rhsOfMemCons " + rhsOfMemCons);
-            //reading file content line by line
-//            String line = reader.readLine();
-//            String[] lineArray = line.split(":");
-//            System.out.println(Arrays.toString(lineArray));
-//            System.out.println("lineArray[0] " + lineArray[0]);
-//            String lenConsName = "#length_constraints";
-//            int noOfLenCons = Integer.parseInt(lineArray[1]);
-//            System.out.println(noOfLenCons);
-//            int noOfConsRead = 0;
-//            while(noOfConsRead < noOfLenCons){
-//            	line = reader.readLine();
-//            	System.out.println(line);
-//  	            String[] data = line.split("\t");
-//  	            System.out.println(Arrays.toString(data));
-//  	          noOfConsRead++;
-//  	        }
-//            while((line = reader.readLine()) != null){
-//                System.out.println(line);
-//        	    String[] data = line.split("\t");
-//        	    System.out.println(Arrays.toString(data));
-//            }
+            getEqDeqConstraints_(reader, lhsEqDeqCons_, relLhs2RhsOfEqDeqCons, rhsEqDeqCons_);
+            
             reader.close();
                  
         } catch (FileNotFoundException ex) {
@@ -61,6 +46,84 @@ public class DemoProgram {
 		//splitExample();
 	}
 	
+	private static int getNumOfConjuncts(BufferedReader reader) {
+		// TODO Auto-generated method stub
+		int result = 0;
+		try {
+			String line;
+			line = reader.readLine();
+	        String[] lineArray = line.split(":");
+	        
+	        result = Integer.parseInt(lineArray[1]);
+			
+		} catch (FileNotFoundException ex) {
+			System.out.println("File not found");
+        } 
+		catch (IOException ex) {
+			System.out.println("IO exception");
+    	}
+		
+		return result;
+	}
+
+	private static void getEqDeqConstraints_(BufferedReader reader, ArrayList<ArrayList<String>> lhsEqDeqCons_,
+			List<EqualityRelation> relLhs2RhsOfEqDeqCons, ArrayList<ArrayList<String>> rhsEqDeqCons_) {
+		// TODO Auto-generated method stub
+		try {
+			String line;
+			line = reader.readLine();
+	        String[] lineArray = line.split(":");
+	        
+	        String eqConsName = "#equality_constraints";
+            int noOfEqCons = Integer.parseInt(lineArray[1]);
+            
+            int noOfConsRead = 0;
+	        
+            while(noOfConsRead < noOfEqCons){
+            	line = reader.readLine();
+	        	
+		        String[] data = line.split("\t");
+		        EqualityRelation relLhs2RhsOfEqDeqConsI = EqualityRelation.EQUAL;
+		        String relLhs2RhsOfEqDeqConsStr = data[0];
+		        if (relLhs2RhsOfEqDeqConsStr.equals("!="))
+		        	relLhs2RhsOfEqDeqConsI = EqualityRelation.NOTEQUAL;
+		        
+		        ArrayList<String> lhsEqDeqConsI = new ArrayList<String> ();
+		        ArrayList<String> rhsEqDeqConsI = new ArrayList<String> ();
+		        
+		        String leftTerm = data[1];
+		        
+		        String[] leftTermContents = leftTerm.split("\\.");
+		        
+		        for (int i = 0; i < leftTermContents.length; i++) {
+		        	lhsEqDeqConsI.add(leftTermContents[i]);		        	
+		        }
+		        
+		        lhsEqDeqCons_.add(lhsEqDeqConsI);
+		        
+		        String rightTerm = data[2];
+		        
+		        String[] rightTermContents = rightTerm.split("\\.");
+		        
+		        for (int i = 0; i < rightTermContents.length; i++) {
+		        	rhsEqDeqConsI.add(rightTermContents[i]);		        	
+		        }
+		        
+		        rhsEqDeqCons_.add(rhsEqDeqConsI);
+		        		        
+		        noOfConsRead++;
+	        }
+        }
+		catch (FileNotFoundException ex) {
+			System.out.println("File not found");
+        } 
+		catch (IOException ex) {
+			System.out.println("IO exception");
+    	}
+
+		
+	}
+
 	private static void getLengthConstraints_(BufferedReader reader, List<Map<String, Integer>> lhsOfLenCons_,
 			List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons) {
 		// TODO Auto-generated method stub
@@ -68,10 +131,10 @@ public class DemoProgram {
 			String line;
 			line = reader.readLine();
 	        String[] lineArray = line.split(":");
-	        System.out.println(Arrays.toString(lineArray));
+	        //System.out.println(Arrays.toString(lineArray));
 	        String lenConsName = "#length_constraints";
             int noOfLenCons = Integer.parseInt(lineArray[1]);
-            System.out.println(noOfLenCons);
+            //System.out.println(noOfLenCons);
             int noOfConsRead = 0;
 	        //System.out.println("lhsOfMemCons " + lhsOfMemCons);
 	        //System.out.println("rhsOfMemCons " + rhsOfMemCons);
@@ -96,9 +159,9 @@ public class DemoProgram {
 		        for (int termId = 1; termId < data.length - 1; termId++) {
 		        	String leftTermWithP = data[termId];
 		        	String leftTerm = leftTermWithP.substring(1, leftTermWithP.length()-1);
-		        	System.out.println(leftTerm);
+		        	//System.out.println(leftTerm);
 		        	String[] termContents = leftTerm.split(" ");
-		            System.out.println(Arrays.toString(termContents));
+		            //System.out.println(Arrays.toString(termContents));
 		            String termSign = termContents[0];
 		            int termCoeff = Integer.parseInt(termContents[1]);
 		            if (termSign.equals("-"))
@@ -111,12 +174,9 @@ public class DemoProgram {
 		        relLhs2RhsOfLenCons.add(relLhs2RhsOfLenConsI);
 		        rhsOfLenCons.add(rhsOfLenConsI);
 		        
-		        System.out.println(Arrays.toString(data));
+		        //System.out.println(Arrays.toString(data));
 		        noOfConsRead++;
 	        }
-            System.out.println(relLhs2RhsOfLenCons);
-            System.out.println(lhsOfLenCons_);
-            System.out.println(rhsOfLenCons);
         }
 		catch (FileNotFoundException ex) {
 			System.out.println("File not found");
