@@ -17,24 +17,40 @@ public class DemoProgram {
 
 	public static void main(String[] args) {
 		int noOfConjuncts = 1;
-		ArrayList<ArrayList<String>> lhsOfMemCons = new ArrayList<ArrayList<String>> () ;
-		List<Automaton> rhsOfMemCons = new ArrayList<Automaton> ();
-		List<Map<String, Integer>> lhsOfLenCons_ = new ArrayList<Map<String, Integer>> ();
-		List<Integer> rhsOfLenCons = new ArrayList<Integer> ();
-		List<IntegerRelation> relLhs2RhsOfLenCons = new ArrayList<IntegerRelation> ();
-		ArrayList<ArrayList<String>> lhsEqDeqCons_ = new ArrayList<ArrayList<String>> ();
-		ArrayList<ArrayList<String>> rhsEqDeqCons_ = new ArrayList<ArrayList<String>> ();
-		List<EqualityRelation> relLhs2RhsOfEqDeqCons = new ArrayList<EqualityRelation> ();
+		ArrayList<ArrayList<String>> lhsOfMemCons;
+		List<Automaton> rhsOfMemCons;
+		List<Map<String, Integer>> lhsOfLenCons_;
+		List<Integer> rhsOfLenCons;
+		List<IntegerRelation> relLhs2RhsOfLenCons;
+		ArrayList<ArrayList<String>> lhsEqDeqCons_ ;
+		ArrayList<ArrayList<String>> rhsEqDeqCons_ ;
+		List<EqualityRelation> relLhs2RhsOfEqDeqCons;
+		boolean satFound = false;
+		int noOfExaminedConjuncts = 0;
 		try {
             //opening file for reading in Java
             String file = "/home/hamid/eclipse-workspace/DemoProject/src/test.txt";
             BufferedReader reader = new BufferedReader(new FileReader(file));
             noOfConjuncts = getNumOfConjuncts(reader);
             System.out.println("Noofconj = " + noOfConjuncts);
-            getMemConstraints(reader, lhsOfMemCons, rhsOfMemCons);
-            getLengthConstraints_(reader, lhsOfLenCons_, relLhs2RhsOfLenCons, rhsOfLenCons);
-            getEqDeqConstraints_(reader, lhsEqDeqCons_, relLhs2RhsOfEqDeqCons, rhsEqDeqCons_);
-            
+            while (!satFound && (noOfExaminedConjuncts < noOfConjuncts)) {
+            	lhsOfMemCons = new ArrayList<ArrayList<String>> () ;
+        		rhsOfMemCons = new ArrayList<Automaton> ();
+        		lhsOfLenCons_ = new ArrayList<Map<String, Integer>> ();
+        		rhsOfLenCons = new ArrayList<Integer> ();
+        		relLhs2RhsOfLenCons = new ArrayList<IntegerRelation> ();
+        		lhsEqDeqCons_ = new ArrayList<ArrayList<String>> ();
+        		rhsEqDeqCons_ = new ArrayList<ArrayList<String>> ();
+        		relLhs2RhsOfEqDeqCons = new ArrayList<EqualityRelation> ();
+            	getMemConstraints(reader, lhsOfMemCons, rhsOfMemCons);
+                getLengthConstraints_(reader, lhsOfLenCons_, relLhs2RhsOfLenCons, rhsOfLenCons);
+                getEqDeqConstraints_(reader, lhsEqDeqCons_, relLhs2RhsOfEqDeqCons, rhsEqDeqCons_);
+                System.out.println("lhsOfMemCons = " + lhsOfMemCons);
+                System.out.println("lhsOfLenCons_ = " + lhsOfLenCons_);
+                System.out.println("lhsEqDeqCons_ = " + lhsEqDeqCons_);
+                satFound = false;
+                noOfExaminedConjuncts = noOfExaminedConjuncts + 1;                
+            }
             reader.close();
                  
         } catch (FileNotFoundException ex) {
