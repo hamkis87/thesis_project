@@ -15,11 +15,11 @@ import com.microsoft.z3.*;
 public class DemoProgramStr {
 
 	public static void main(String[] args) {
-		readUserInput();
+		runSolver();
 		//testSat();
 	}
 	
-	public static void readUserInput() {
+	public static void runSolver() {
 		// for each disjunct in the user input:
 		//    example: ((abc in A1) and (len(d) < 5) and (fa not in A2) and (gbe in A3))
 		// make two parts, one with only string constraints, the other with length constraints
