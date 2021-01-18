@@ -66,32 +66,6 @@ public class DemoProgramStr {
 	}
 		
 		
-		
-		
-		
-		//ArrayList<ArrayList<String>> lhsOfMemCons_ = new ArrayList<ArrayList<String>> ();
-		//List<Automaton> rhsOfMemCons = new ArrayList<Automaton> ();
-		//getMemConstraints(lhsOfMemCons_, rhsOfMemCons);
-		
-		
-		//List<Map<String, Integer>> lhsOfLenCons_ = new ArrayList<Map<String, Integer>> ();
-		//List<Integer> rhsOfLenCons = new ArrayList<Integer> ();
-		//List<IntegerRelation> relLhs2RhsOfLenCons = new ArrayList<IntegerRelation> ();
-		//getLengthConstraints_(lhsOfLenCons_, relLhs2RhsOfLenCons, rhsOfLenCons);
-		
-//		System.out.println("lhsOfLenCons_ = " + lhsOfLenCons_);
-//		System.out.println("rhsOfLenCons = " + rhsOfLenCons);
-//		System.out.println("relLhs2RhsOfLenCons = " + relLhs2RhsOfLenCons);
-		
-		//ArrayList<ArrayList<String>> lhsEqDeqCons_ = new ArrayList<ArrayList<String>> ();
-		//ArrayList<ArrayList<String>> rhsEqDeqCons_ = new ArrayList<ArrayList<String>> ();
-		//List<EqualityRelation> relLhs2RhsOfEqDeqCons = new ArrayList<EqualityRelation> ();
-		//getEqDeqConstraints_(lhsEqDeqCons_, relLhs2RhsOfEqDeqCons, rhsEqDeqCons_);
-//		System.out.println("lhsEqDeqCons_ = " + lhsEqDeqCons_);
-//		System.out.println("rhsEqDeqCons_ = " + rhsEqDeqCons_);
-//		System.out.println("relLhs2RhsOfEqDeqCons = " + relLhs2RhsOfEqDeqCons);
-		
-		
 	private static boolean runSolver(ArrayList<ArrayList<String>> lhsOfMemCons_, List<Automaton> rhsOfMemCons, 
 			                         List<Map<String, Integer>> lhsOfLenCons_, List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons, 
 			                         ArrayList<ArrayList<String>> lhsEqDeqCons_, List<EqualityRelation> relLhs2RhsOfEqDeqCons, ArrayList<ArrayList<String>> rhsEqDeqCons_) {	
@@ -101,8 +75,8 @@ public class DemoProgramStr {
 				new ArrayList<ArrayList<Map<Integer, Integer> > > ();
 		ArrayList<String> variables_ = new ArrayList<String> ();
 		processMembershipConstraints_(variables_, refinedIntegerArithDnf_, lhsOfMemCons_, rhsOfMemCons);
-		System.out.println("variables_: " + variables_);
-		System.out.println("refinedIntegerArithDnf_: " + refinedIntegerArithDnf_);
+		//System.out.println("variables_: " + variables_);
+		//System.out.println("refinedIntegerArithDnf_: " + refinedIntegerArithDnf_);
 		if(refinedIntegerArithDnf_.size() == 0) {
 			System.out.println("memebership constraints are UNSAT");
 		}
@@ -134,11 +108,11 @@ public class DemoProgramStr {
 		                    lengthVariables_, variables_, context, solver, 
 		                    previousSatIntegerArithDisjId);
 					if (previousSatIntegerArithDisjId < refinedIntegerArithDnf_.size()) {
-						System.out.println("nextSatIntegerArithDisjId_ = " + nextSatIntegerArithDisjId_);
+						//System.out.println("nextSatIntegerArithDisjId_ = " + nextSatIntegerArithDisjId_);
 						while (solver.check().equals(Status.SATISFIABLE)) {
-							System.out.println("solver after adding membership constraints= " + solver.toString());						
+							//System.out.println("solver after adding membership constraints= " + solver.toString());						
 							Model model = solver.getModel();
-							System.out.println(model.toString());
+							//System.out.println(model.toString());
 							String maxLenVar = getMaxLenVar(
 									lengthVariables_, model);
 							Expr maxLenVar_expr = model.getConstInterp(lengthVariables_.get(maxLenVar));
@@ -389,58 +363,15 @@ public class DemoProgramStr {
 		return result;
 	}
 
-//	private static void getMemConstraints(ArrayList<ArrayList<String>> lhsOfMemCons,
-//			List<Automaton> rhsOfMemCons) {
-//		// TODO Auto-generated method stub
-//		ArrayList<String> lhsOfMemCons_1 = new ArrayList<String>();
-//		lhsOfMemCons_1.add("x");
-//		lhsOfMemCons_1.add("y");
-//		lhsOfMemCons_1.add("m");
-//		ArrayList<String> lhsOfMemCons_2 = new ArrayList<String>();
-//		lhsOfMemCons_2.add("m");
-//		ArrayList<String> lhsOfMemCons_3 = new ArrayList<String>();
-//		lhsOfMemCons_3.add("z");
-//		lhsOfMemCons_3.add("w");
-//		//ArrayList<String> lhsOfMemCons_4 = new ArrayList<String>();
-//		//lhsOfMemCons_4.add("w");
-//		//ArrayList<String> lhsOfMemCons_5 = new ArrayList<String>();
-//		//lhsOfMemCons_5.add("w");
-//		//lhsOfMemCons_5.add("x");
-//		//lhsOfMemCons_5.add("z");
-//        // xym = cab.ab.b
-//		// zw = ba.ba
-//		RegExp r1 = new RegExp("(a|b|c)*");
-//		RegExp r2 = new RegExp("b*");
-//		RegExp r3 = new RegExp("(a|b)*");
-//		//RegExp r4 = new RegExp("(c|a)+");
-//		//RegExp r5 = new RegExp("z+");
-//		Automaton rhsOfMemCons1 = r1.toAutomaton();
-//		Automaton rhsOfMemCons2 = r2.toAutomaton();
-//		Automaton rhsOfMemCons3 = r3.toAutomaton();
-//		//Automaton rhsOfMemCons4 = r4.toAutomaton();
-//		//Automaton rhsOfMemCons5 = r5.toAutomaton();
-//		lhsOfMemCons.add(lhsOfMemCons_1);
-//		lhsOfMemCons.add(lhsOfMemCons_2);
-//		lhsOfMemCons.add(lhsOfMemCons_3);
-//		//lhsOfMemCons.add(lhsOfMemCons_4);
-//		//lhsOfMemCons.add(lhsOfMemCons_5);
-//		
-//		rhsOfMemCons.add(rhsOfMemCons1);
-//		rhsOfMemCons.add(rhsOfMemCons2);
-//		rhsOfMemCons.add(rhsOfMemCons3);
-//		//rhsOfMemCons.add(rhsOfMemCons4);
-//		//rhsOfMemCons.add(rhsOfMemCons5);
-//	}
-
 	private static boolean underApproximation_(ArrayList<String> u_variables_, ArrayList<ArrayList<String>> lhsEqDeqCons_,
 			List<EqualityRelation> relLhs2RhsOfEqDeqCons, ArrayList<ArrayList<String>> rhsEqDeqCons_, ArrayList<ArrayList<String>> lhsOfMemCons_, List<Automaton> rhsOfMemCons, List<Map<String, Integer>> lhsOfLenCons_, List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons, Map<String, IntExpr> oldLengthVariables, int maxLenVar_int, Context context, Solver solver) {
 		// TODO Auto-generated method stub
-		System.out.println("****************************************************************");
-		System.out.println("****************************************************************");
-		System.out.println("The UnderApproximation function");
-		System.out.println("The lhsEqDeqCons: " + lhsEqDeqCons_);
-		System.out.println("The relLhs2RhsOfEqDeqCons: " + relLhs2RhsOfEqDeqCons);
-		System.out.println("The rhsEqDeqCons: " + rhsEqDeqCons_);
+		//System.out.println("****************************************************************");
+		//System.out.println("****************************************************************");
+		//System.out.println("The UnderApproximation function");
+		//System.out.println("The lhsEqDeqCons: " + lhsEqDeqCons_);
+		//System.out.println("The relLhs2RhsOfEqDeqCons: " + relLhs2RhsOfEqDeqCons);
+		//System.out.println("The rhsEqDeqCons: " + rhsEqDeqCons_);
 		// u_variables should be substituted with variable. it is used here for testing the
 		// underApproximation function implementation
 		//ArrayList<String> u_variables = new ArrayList<String> ();
@@ -450,17 +381,17 @@ public class DemoProgramStr {
 		Map<String, ArrayList<String> > u_variables_split2 = new HashMap<String, ArrayList<String> > ();
 		//ArrayList<String> extended_variables = new ArrayList<String> ();
 		ArrayList<String> extended_variables;
-		System.out.println("u_variables: " + u_variables_);
+		//System.out.println("u_variables: " + u_variables_);
 		//int K_parameter = 3;
 		boolean solution_found = false;
 		ArrayList<ArrayList<Integer>> lengthPermutations = 
 				getPermutations2(maxLenVar_int, u_variables_.size());
-		System.out.println("lengthPermutations: " + lengthPermutations);
+		//System.out.println("lengthPermutations: " + lengthPermutations);
 		//u_variables_split_count = lengthPermutations.get(7);
 		for (int uid = 0; uid < lengthPermutations.size(); uid++) {
 			extended_variables = new ArrayList<String> ();
 			u_variables_split_count = lengthPermutations.get(uid);
-			System.out.println("u_variables_split_count: " + u_variables_split_count);
+			//System.out.println("u_variables_split_count: " + u_variables_split_count);
 			for (int i = 0; i < u_variables_.size(); i++) {
 				String c = u_variables_.get(i);
 				int split_count = u_variables_split_count.get(i);
@@ -471,8 +402,8 @@ public class DemoProgramStr {
 				extended_variables.addAll(c_split_into);
 				u_variables_split.put(c, c_split_into);
 			}
-			System.out.println("u_variables_split: " + u_variables_split);
-			System.out.println("extended_variables: " + extended_variables);
+			//System.out.println("u_variables_split: " + u_variables_split);
+			//System.out.println("extended_variables: " + extended_variables);
 			// fixedVars should contain the value(s) for each variable,
 			// for example fixedVars[x1] = {y2,z3} means that x1 = y2 and x1 = z3
 			// fixedVars[x] = {.., x, ..} is not allowed
@@ -511,21 +442,21 @@ public class DemoProgramStr {
 				//System.out.println("splitRhsEqDeqConsI: " + splitRhsEqDeqConsI);
 				fixVariables(fixedVars, splitLhsEqDeqConsI, splitRhsEqDeqConsI);	
 			}
-			System.out.println("fixedVars: " + fixedVars);
+			//System.out.println("fixedVars: " + fixedVars);
 			preprocessVars(fixedVars, u_variables_split, u_variables_split2);
 			//System.out.println("Permutations: " + getPermutations(2,2));
 			// In newLhsOfMemCons, variables are substituted according to u_variables_split
 			ArrayList<ArrayList<String>> newLhsOfMemCons = new ArrayList<ArrayList<String>> ();
 			getNewLhsOfMemCons(newLhsOfMemCons, lhsOfMemCons_, u_variables_split2);
-			System.out.println("lhsOfMemCons_: " + lhsOfMemCons_);
-			System.out.println("newLhsOfMemCons: " + newLhsOfMemCons);
+			//System.out.println("lhsOfMemCons_: " + lhsOfMemCons_);
+			//System.out.println("newLhsOfMemCons: " + newLhsOfMemCons);
 			// ArrayList<ArrayList<String>> lhsOfLenCons_, List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons
 			List<Map<String, Integer>>  newlhsOfLenCons = new ArrayList<Map<String, Integer>> ();
 			getNewLhsOfLenCons(newlhsOfLenCons, lhsOfLenCons_, u_variables_split2);
-			System.out.println("lhsOfLenCons_: " + lhsOfLenCons_);
-			System.out.println("newlhsOfLenCons: " + newlhsOfLenCons);
+			//System.out.println("lhsOfLenCons_: " + lhsOfLenCons_);
+			//System.out.println("newlhsOfLenCons: " + newlhsOfLenCons);
 			Map<String, IntExpr> newLengthVariables = makeLengthVariables_(context, extended_variables);
-			System.out.println("newLengthVariables: " + newLengthVariables);
+			//System.out.println("newLengthVariables: " + newLengthVariables);
 			solver.push();
 			addLengthConstraintsToSolver_(newlhsOfLenCons, relLhs2RhsOfLenCons, rhsOfLenCons, 
 					newLengthVariables, context, solver);
@@ -553,16 +484,6 @@ public class DemoProgramStr {
 			System.out.println("out of the " + lengthPermutations.size() + " alternatives");	
 		}
 		return solution_found;
-	}
-	
-	private static void addMemConstraintsToSolver_(ArrayList<ArrayList<String>> newLhsOfMemCons,
-			List<Automaton> rhsOfMemCons, Map<String, IntExpr> newLengthVariables, Context context, Solver solver) {
-		// TODO Auto-generated method stub
-		ArrayList<ArrayList<Map<Integer, Integer> > > refinedIntegerArithDnf_ =
-				new ArrayList<ArrayList<Map<Integer, Integer> > > ();
-		ArrayList<String> variables_ = new ArrayList<String> ();
-		//processMembershipConstraints_(variables_, refinedIntegerArithDnf_, lhsOfMemCons_, rhsOfMemCons);
-		
 	}
 
 	private static void preprocessVars(Map<String, HashSet<String>> fixedVars, Map<String, ArrayList<String>> u_variables_split1, Map<String, ArrayList<String>> u_variables_split2) {
@@ -614,8 +535,8 @@ public class DemoProgramStr {
 				equalVarsClusters.put(groupId, equalVarsSet);
 			}
 		}
-		System.out.println("equalVarsMap = " + equalVarsMap);
-		System.out.println("equalVarsClusters = " + equalVarsClusters);
+		//System.out.println("equalVarsMap = " + equalVarsMap);
+		//System.out.println("equalVarsClusters = " + equalVarsClusters);
 		Map<Integer, String> equalVarsMap2 = new HashMap<Integer, String> ();
 		for (Integer key: equalVarsClusters.keySet()) {
 			TreeSet<String> equalVarsSet = equalVarsClusters.get(key);
@@ -626,8 +547,8 @@ public class DemoProgramStr {
 				equalVarsMap2.put(key, equalVarsSet.last());								
 			}
 		}
-		System.out.println("equalVarsMap2 = " + equalVarsMap2);
-		System.out.println("u_variables_split1 = " + u_variables_split1);
+		//System.out.println("equalVarsMap2 = " + equalVarsMap2);
+		//System.out.println("u_variables_split1 = " + u_variables_split1);
 		for (String s: u_variables_split1.keySet()) {
 			ArrayList<String> s_split_into1 = u_variables_split1.get(s);
 			ArrayList<String> s_split_into2 = new ArrayList<String> ();
@@ -650,34 +571,16 @@ public class DemoProgramStr {
 				}
 			}
 		}
-		System.out.println("u_variables_split2 = " + u_variables_split2);		
+		//System.out.println("u_variables_split2 = " + u_variables_split2);		
 	}
-
-//	private static void addfixedVariablesToSolver(Map<String, HashSet<String>> fixedVars,
-//			Map<String, IntExpr> newLengthVariables, Context context, Solver solver) {
-//		// TODO Auto-generated method stub
-//		for (String lvar: fixedVars.keySet()) {
-//			if (fixedVars.get(lvar).size() > 0) {
-//				IntExpr leftVar = newLengthVariables.get(lvar);
-//				for (String rvar: fixedVars.get(lvar)) {
-//					IntExpr rightVar = context.mkInt(0);						
-//					if (!rvar.equals("EPSILON")) {
-//						rightVar = newLengthVariables.get(rvar);											
-//					}
-//					BoolExpr b = context.mkEq(leftVar, rightVar);
-//					solver.add(b);	
-//				}			
-//			}
-//		}
-//	}
 
 	private static void addSplitVariablesToSolver(Map<String, IntExpr> oldLengthVariables,
 			Map<String, IntExpr> newLengthVariables, Map<String, ArrayList<String>> variables_split1, Map<String, ArrayList<String>> variables_split2, Context context, Solver solver) {
 		// TODO Auto-generated method stub
-		System.out.println("oldLengthVariables = " + oldLengthVariables);
-		System.out.println("newLengthVariables = " + newLengthVariables);
-		System.out.println("variables_split1 = " + variables_split1);
-		System.out.println("variables_split2 = " + variables_split2);
+		//System.out.println("oldLengthVariables = " + oldLengthVariables);
+		//System.out.println("newLengthVariables = " + newLengthVariables);
+		//System.out.println("variables_split1 = " + variables_split1);
+		//System.out.println("variables_split2 = " + variables_split2);
 		for (String leftVar: variables_split1.keySet()) {
 			IntExpr oldVar = oldLengthVariables.get(leftVar);
 			IntExpr extendedVar = context.mkInt(0);			
@@ -685,7 +588,7 @@ public class DemoProgramStr {
 				extendedVar = (IntExpr) context.mkAdd(newLengthVariables.get(rightVar), extendedVar);												
 			}
 			BoolExpr b = context.mkEq(oldVar, extendedVar);
-			System.out.println("b = " + b);
+			//System.out.println("b = " + b);
 			solver.add(b);
 		}
 		for (String leftVar: variables_split2.keySet()) {
@@ -695,7 +598,7 @@ public class DemoProgramStr {
 				extendedVar = (IntExpr) context.mkAdd(newLengthVariables.get(rightVar), extendedVar);												
 			}
 			BoolExpr b = context.mkEq(oldVar, extendedVar);
-			System.out.println("b = " + b);
+			//System.out.println("b = " + b);
 			solver.add(b);
 		}
 	}
@@ -859,7 +762,7 @@ public class DemoProgramStr {
 				//System.out.println(linearConstraint);
 			}
 		}
-		System.out.println("solver in the testSat function: " + solver);
+		//System.out.println("solver in the testSat function: " + solver);
 		Status satStatus = solver.check();
 		boolean isSat = satStatus.equals(Status.SATISFIABLE);
 		//System.out.println("Constraints are SAT: " + isSat);
@@ -940,7 +843,7 @@ public class DemoProgramStr {
 				//System.out.println(linearConstraint);
 			}
 		}
-		System.out.println("solver in the testSat function: " + solver);
+		//System.out.println("solver in the testSat function: " + solver);
 		Status satStatus = solver.check();
 		boolean isSat = satStatus.equals(Status.SATISFIABLE);
 		//System.out.println("Constraints are SAT: " + isSat);
@@ -1001,75 +904,6 @@ public class DemoProgramStr {
 		return lengthVariables;
 	}
 	
-//	private static void getEqDeqConstraints_(ArrayList<ArrayList<String>> lhsEqDeqCons_,
-//			List<EqualityRelation> relLhs2RhsOfEqDeqCons, ArrayList<ArrayList<String>> rhsEqDeqCons_) {
-//		// TODO Auto-generated method stub
-//		ArrayList<String> lhsEqDeqCons1_ = new ArrayList<String> ();
-//		ArrayList<String> lhsEqDeqCons2_ = new ArrayList<String> ();
-//		//String lhsEqDeqCons1, lhsEqDeqCons2;
-//		EqualityRelation relLhs2RhsOfEqDeqCons1, relLhs2RhsOfEqDeqCons2;
-//		ArrayList<String> rhsEqDeqCons1_ = new ArrayList<String> ();
-//		ArrayList<String> rhsEqDeqCons2_ = new ArrayList<String> ();
-//		//String rhsEqDeqCons1, rhsEqDeqCons2;
-//        // xym = cab.ab.b
-//		// zw = ba.ba
-//		lhsEqDeqCons1_.add("z");
-//		lhsEqDeqCons1_.add("w");
-//		lhsEqDeqCons1_.add("m");
-//		rhsEqDeqCons1_.add("m");
-//		rhsEqDeqCons1_.add("y");
-//		rhsEqDeqCons1_.add("y");
-//		relLhs2RhsOfEqDeqCons1 = EqualityRelation.EQUAL;
-//		lhsEqDeqCons_.add(lhsEqDeqCons1_);
-//		rhsEqDeqCons_.add(rhsEqDeqCons1_);
-//		relLhs2RhsOfEqDeqCons.add(relLhs2RhsOfEqDeqCons1);
-//		
-//		lhsEqDeqCons2_.add("m");
-//		lhsEqDeqCons2_.add("y");
-//		rhsEqDeqCons2_.add("w");
-//		rhsEqDeqCons2_.add("m");
-//		relLhs2RhsOfEqDeqCons2 = EqualityRelation.EQUAL;
-//		lhsEqDeqCons_.add(lhsEqDeqCons2_);
-//		rhsEqDeqCons_.add(rhsEqDeqCons2_);
-//		relLhs2RhsOfEqDeqCons.add(relLhs2RhsOfEqDeqCons2);
-//		
-//	}
-	
-//	private static void getLengthConstraints_(List<Map<String, Integer>> lhsOfLenCons_,
-//			List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons) {
-//		// TODO Auto-generated method stub
-//		Map<String, Integer> lhsOfLenCons1 = new HashMap<String, Integer> ();
-//		Map<String, Integer> lhsOfLenCons2 = new HashMap<String, Integer> ();
-//		Map<String, Integer> lhsOfLenCons3 = new HashMap<String, Integer> ();
-//		int rhsOfLenCons1, rhsOfLenCons2, rhsOfLenCons3;
-//		IntegerRelation relLhs2RhsOfLenCons1, relLhs2RhsOfLenCons2, relLhs2RhsOfLenCons3;
-//        // xym = cab.ab.b
-//		// zw = ba.ba
-//		lhsOfLenCons1.put("x", 1);
-//		lhsOfLenCons1.put("m", -1);
-//		rhsOfLenCons1 = 1;
-//		relLhs2RhsOfLenCons1 = IntegerRelation.GREATER;
-//		lhsOfLenCons_.add(lhsOfLenCons1);
-//		relLhs2RhsOfLenCons.add(relLhs2RhsOfLenCons1);
-//		rhsOfLenCons.add(rhsOfLenCons1);
-//		
-//		lhsOfLenCons2.put("w", 2);
-//		lhsOfLenCons2.put("z", 1);
-//		lhsOfLenCons2.put("y", 1);
-//		rhsOfLenCons2 = 10;
-//		relLhs2RhsOfLenCons2 = IntegerRelation.LESS;
-//		lhsOfLenCons_.add(lhsOfLenCons2);
-//		relLhs2RhsOfLenCons.add(relLhs2RhsOfLenCons2);
-//		rhsOfLenCons.add(rhsOfLenCons2);
-//		
-//		lhsOfLenCons3.put("x", 3);
-//		rhsOfLenCons3 = 9;
-//		relLhs2RhsOfLenCons3 = IntegerRelation.GREATEREQUAL;
-//		lhsOfLenCons_.add(lhsOfLenCons3);
-//		relLhs2RhsOfLenCons.add(relLhs2RhsOfLenCons3);
-//		rhsOfLenCons.add(rhsOfLenCons3);		
-//	}
-
 	private static void processMembershipConstraints_(ArrayList<String> variables_,
 			ArrayList<ArrayList<Map<Integer, Integer>>> refinedIntegerArithDnf_,
 			ArrayList<ArrayList<String>> lhsOfMemCons_, List<Automaton> rhsOfMemCons) {
@@ -1121,13 +955,7 @@ public class DemoProgramStr {
 			if (isPossibleSol) {
 				refinedIntegerArithDnf.add(possibleSol);				
 			}
-		}
-		//int x = integerArithDnf.size() - result.size();
-		//boolean check = x == countImpossibleSols;
-		//System.out.println("Check refineIntegerArithDnf is correct: " + check);
-		//System.out.println("integerArithDnf size = " + integerArithDnf.size());
-		//System.out.println("countImpossibleSols = " + countImpossibleSols);
-		//System.out.println("refineIntegerArithDnf output: " + result);		
+		}		
 	}
 
 	public static ArrayList<ArrayList<Map<Integer, Integer> > > getIntegerArithDnf
@@ -1157,9 +985,6 @@ public class DemoProgramStr {
 			for (int j = 0; j < automatonConjunctions.size(); j++) {
 				Automaton oneSymbolAutomaton = changeToOneSymbolAndMinimize(automatonConjunctions.get(j));
 				oneSymbolAutomataConjunctions.add(oneSymbolAutomaton);
-//				if (!testLasso(oneSymbolAutomaton)) {
-//					areLassoAll = false;			
-//				}
 			}
 			oneSymbolAutomataDnf.add(oneSymbolAutomataConjunctions);			
 		}
