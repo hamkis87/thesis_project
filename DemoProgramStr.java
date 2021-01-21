@@ -32,7 +32,7 @@ public class DemoProgramStr {
 		int noOfExaminedConjuncts = 0;
 		try {
             //opening file for reading in Java
-            String file = "/home/hamid/eclipse-workspace/DemoProject/src/sat1.txt";
+            String file = "/home/hamid/eclipse-workspace/DemoProject/src/sat2.txt";
             BufferedReader reader = new BufferedReader(new FileReader(file));
             noOfConjuncts = getNumOfConjuncts(reader);
             System.out.println("Noofconj = " + noOfConjuncts);
@@ -206,10 +206,23 @@ public class DemoProgramStr {
 		        }
 		        //System.out.println("lhsOfMemConsI " + lhsOfMemConsI);
 		        lhsOfMemCons.add(lhsOfMemConsI);
-		        RegExp rhsOfMemConsRegexI = new RegExp(data[1]);
+		        System.out.println("rhsOfMemConsI " + data[1]);
+		        RegExp rhsOfMemConsRegexI;
+		        Automaton rhsOfMemConsI;
+		        if (data[1].charAt(data[1].length()-1) == '\'') {
+		        	String rhsModified = data[1].substring(0, data[1].length()-1);
+		        	rhsOfMemConsRegexI = new RegExp(rhsModified);	
+		        	System.out.println("rhsModified " + rhsModified);
+		        	rhsOfMemConsI = rhsOfMemConsRegexI.toAutomaton().complement();
+		        }
+		        else {
+		        	rhsOfMemConsRegexI = new RegExp(data[1]);		        	
+		        	rhsOfMemConsI = rhsOfMemConsRegexI.toAutomaton();
+		        }
+		        	
 		        //System.out.println("rhsOfMemConsRegexIStr " + data[1]);
 		        //System.out.println("rhsOfMemConsRegexI " + rhsOfMemConsRegexI);
-		        Automaton rhsOfMemConsI = rhsOfMemConsRegexI.toAutomaton();
+		        //Automaton rhsOfMemConsI = rhsOfMemConsRegexI.toAutomaton();
 		        //System.out.println("rhsOfMemConsI " + rhsOfMemConsI);
 		        rhsOfMemCons.add(rhsOfMemConsI);
 		        noOfConsRead++;	        	
@@ -471,7 +484,7 @@ public class DemoProgramStr {
 				System.out.println("in the " + (uid + 1) + " / " + lengthPermutations.size() + " attempt.");
 				Model model = solver.getModel();
 				System.out.println(model.toString());
-				//addMemConstraintsToSolver_(newLhsOfMemCons, rhsOfMemCons, newLengthVariables, context, solver);
+				addMemConstraintsToSolver_(newLhsOfMemCons, rhsOfMemCons, newLengthVariables, context, solver);
 				//solver.pop();
 				break;
 			}
@@ -485,6 +498,17 @@ public class DemoProgramStr {
 		}
 		return solution_found;
 	}
+
+	private static void addMemConstraintsToSolver_(ArrayList<ArrayList<String>> newLhsOfMemCons,
+			List<Automaton> rhsOfMemCons, Map<String, IntExpr> newLengthVariables, Context context, Solver solver) {
+		// TODO Auto-generated method stub
+		System.out.println("addMemConstraintsToSolver_Start");
+		System.out.println("newLhsOfMemCons " + newLhsOfMemCons);
+		System.out.println("newLengthVariables " + newLengthVariables);
+		System.out.println("addMemConstraintsToSolver_End");	
+		
+	}
+
 
 	private static void preprocessVars(Map<String, HashSet<String>> fixedVars, Map<String, ArrayList<String>> u_variables_split1, Map<String, ArrayList<String>> u_variables_split2) {
 		// TODO Auto-generated method stub
