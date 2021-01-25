@@ -32,7 +32,7 @@ public class DemoProgramStr {
 		int noOfExaminedConjuncts = 0;
 		try {
             //opening file for reading in Java
-            String file = "/home/hamid/eclipse-workspace/DemoProject/src/sat3.txt";
+            String file = "/home/hamid/eclipse-workspace/DemoProject/src/sat2.txt";
             BufferedReader reader = new BufferedReader(new FileReader(file));
             noOfConjuncts = getNumOfConjuncts(reader);
             System.out.println("Noofconj = " + noOfConjuncts);
@@ -78,7 +78,7 @@ public class DemoProgramStr {
 		//System.out.println("variables_: " + variables_);
 		//System.out.println("refinedIntegerArithDnf_: " + refinedIntegerArithDnf_);
 		if(refinedIntegerArithDnf_.size() == 0) {
-			System.out.println("memebership constraints are UNSAT");
+			//System.out.println("memebership constraints are UNSAT");
 		}
 		else {		
 			final Context context = new Context();
@@ -99,6 +99,8 @@ public class DemoProgramStr {
 				boolean stopFlag = false;
 				boolean solution_found = false;
 				while (!stopFlag) {
+					int temp_count = 1 + previousSatIntegerArithDisjId + refinedIntegerArithDnf_.size();
+					System.out.println("#remaining over-approx solutions= " + temp_count);
 					// if we already pushed a disjunct of membership constraints, we need to pop 
 					// them before we push the next disjunct
 					if (previousSatIntegerArithDisjId > -1) {
@@ -402,9 +404,11 @@ public class DemoProgramStr {
 		//System.out.println("lengthPermutations: " + lengthPermutations);
 		//u_variables_split_count = lengthPermutations.get(7);
 		for (int uid = 0; uid < lengthPermutations.size(); uid++) {
+			System.out.print("under-approximation is checking solution no. " + uid);	
+			System.out.println("out of the " + lengthPermutations.size() + " alternatives");
 			extended_variables = new ArrayList<String> ();
 			u_variables_split_count = lengthPermutations.get(uid);
-			System.out.println("u_variables_split_count: " + u_variables_split_count);
+			//System.out.println("u_variables_split_count: " + u_variables_split_count);
 			for (int i = 0; i < u_variables_.size(); i++) {
 				String c = u_variables_.get(i);
 				int split_count = u_variables_split_count.get(i);
@@ -415,8 +419,8 @@ public class DemoProgramStr {
 				extended_variables.addAll(c_split_into);
 				u_variables_split.put(c, c_split_into);
 			}
-			System.out.println("u_variables_split: " + u_variables_split);
-			System.out.println("extended_variables: " + extended_variables);
+			//System.out.println("u_variables_split: " + u_variables_split);
+			//System.out.println("extended_variables: " + extended_variables);
 			// fixedVars should contain the value(s) for each variable,
 			// for example fixedVars[x1] = {y2,z3} means that x1 = y2 and x1 = z3
 			// fixedVars[x] = {.., x, ..} is not allowed
@@ -451,27 +455,27 @@ public class DemoProgramStr {
 						splitRhsEqDeqConsI.add(c_split.get(j));				
 					}
 				}
-				System.out.println("splitLhsEqDeqConsI: " + splitLhsEqDeqConsI);
-				System.out.println("splitRhsEqDeqConsI: " + splitRhsEqDeqConsI);
+				//System.out.println("splitLhsEqDeqConsI: " + splitLhsEqDeqConsI);
+				//System.out.println("splitRhsEqDeqConsI: " + splitRhsEqDeqConsI);
 				fixVariables(fixedVars, splitLhsEqDeqConsI, splitRhsEqDeqConsI);	
 			}
 			//System.out.println("fixedVars: " + fixedVars);
 			preprocessVars(fixedVars, u_variables_split, u_variables_split2);
-			System.out.println("fixedVars: " + fixedVars);
-			System.out.println("u_variables_split: " + u_variables_split);
-			System.out.println("u_variables_split2: " + u_variables_split2);
+			//System.out.println("fixedVars: " + fixedVars);
+			//System.out.println("u_variables_split: " + u_variables_split);
+			//System.out.println("u_variables_split2: " + u_variables_split2);
 			
 			//System.out.println("Permutations: " + getPermutations(2,2));
 			// In newLhsOfMemCons, variables are substituted according to u_variables_split
 			ArrayList<ArrayList<String>> newLhsOfMemCons = new ArrayList<ArrayList<String>> ();
 			getNewLhsOfMemCons(newLhsOfMemCons, lhsOfMemCons_, u_variables_split2);
-			System.out.println("lhsOfMemCons_: " + lhsOfMemCons_);
-			System.out.println("newLhsOfMemCons: " + newLhsOfMemCons);
+			//System.out.println("lhsOfMemCons_: " + lhsOfMemCons_);
+			//System.out.println("newLhsOfMemCons: " + newLhsOfMemCons);
 			// ArrayList<ArrayList<String>> lhsOfLenCons_, List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons
 			List<Map<String, Integer>>  newlhsOfLenCons = new ArrayList<Map<String, Integer>> ();
 			getNewLhsOfLenCons(newlhsOfLenCons, lhsOfLenCons_, u_variables_split2);
-			System.out.println("lhsOfLenCons_: " + lhsOfLenCons_);
-			System.out.println("newlhsOfLenCons: " + newlhsOfLenCons);
+			//System.out.println("lhsOfLenCons_: " + lhsOfLenCons_);
+			//System.out.println("newlhsOfLenCons: " + newlhsOfLenCons);
 			Map<String, IntExpr> newLengthVariables = makeLengthVariables_(context, extended_variables);
 			//System.out.println("newLengthVariables: " + newLengthVariables);
 			solver.push();
@@ -509,33 +513,46 @@ public class DemoProgramStr {
 			List<Automaton> rhsOfMemCons, Map<String, IntExpr> newLengthVariables, Context context, Solver solver) {
 		// TODO Auto-generated method stub
 		boolean result = false;
-		System.out.println("addMemConstraintsToSolver_Start");
-		System.out.println("newLhsOfMemCons " + newLhsOfMemCons);
-		System.out.println("newLengthVariables " + newLengthVariables);
-		
+		//System.out.println("addMemConstraintsToSolver_Start");
+		//System.out.println("newLhsOfMemCons " + newLhsOfMemCons);
+		//System.out.println("newLengthVariables " + newLengthVariables);
+		int count_new_var = 0;
 		ArrayList<ArrayList<String>> processedLhsOfMemCons = new ArrayList<ArrayList<String>> ();
 		List<Automaton> processedRhsOfMemCons =  new ArrayList<Automaton> ();
 		for (int i = 0; i < rhsOfMemCons.size(); i++) {
 			ArrayList<String> LhsOfMemConsI = newLhsOfMemCons.get(i);
+			processedRhsOfMemCons.add(rhsOfMemCons.get(i));
 			if (LhsOfMemConsI.size() > 0) {
 				processedLhsOfMemCons.add(LhsOfMemConsI);
-				processedRhsOfMemCons.add(rhsOfMemCons.get(i));
+			}
+			else {
+				count_new_var++;
+				String c = "fresh_var" + String.valueOf(count_new_var);
+				IntExpr fresh_var = context.mkIntConst("len_" + c);
+				newLengthVariables.put(c, fresh_var);
+				ArrayList<String> newLhsOfMemConsI = new ArrayList<String> ();
+				newLhsOfMemConsI.add(c);
+				processedLhsOfMemCons.add(newLhsOfMemConsI);
+				// add that |fresh_var| = 0
+				BoolExpr emptyVar = context.mkEq(newLengthVariables.get(c), context.mkInt(0));
+				solver.add(emptyVar);
 			}
 		}
-		System.out.println("processedLhsOfMemCons " + processedLhsOfMemCons);
-		if (processedLhsOfMemCons.size() == 0) { // no membership constraints to test
-			System.out.println("The under-approximation found a solution");
-			Model model = solver.getModel();
-			System.out.println(model.toString());
-			return true;
-		}
+		//System.out.println("processedLhsOfMemCons " + processedLhsOfMemCons);
+//		if (processedLhsOfMemCons.size() == 0) { // no membership constraints to test
+//			System.out.println("The under-approximation found a solution");
+//			Model model = solver.getModel();
+//			System.out.println(model.toString());
+//			return true;
+//		}
 		ArrayList<ArrayList<Map<Integer, Integer> > > newRefinedIntegerArithDnf_ =
 				new ArrayList<ArrayList<Map<Integer, Integer> > > ();
 		ArrayList<String> newVariables_ = new ArrayList<String> ();
 		processMembershipConstraints_(newVariables_, newRefinedIntegerArithDnf_, processedLhsOfMemCons, processedRhsOfMemCons);
-		System.out.println("newRefinedIntegerArithDnf_ " + newRefinedIntegerArithDnf_);
+		//System.out.println("newRefinedIntegerArithDnf_ " + newRefinedIntegerArithDnf_);
 		if(newRefinedIntegerArithDnf_.size() == 0) {
-			System.out.println("memebership constraints are UNSAT");
+			//System.out.println("memebership constraints are UNSAT");
+			//return result;
 		}
 		else {
 			for (int i = 0; i < newRefinedIntegerArithDnf_.size(); i++) {
@@ -556,7 +573,7 @@ public class DemoProgramStr {
 				}				
 			}
 		}
-		System.out.println("addMemConstraintsToSolver_End");
+		//System.out.println("addMemConstraintsToSolver_End");
 		return result; 		
 	}
 
@@ -1016,7 +1033,7 @@ public class DemoProgramStr {
 		ArrayList<ArrayList<Automaton> > simpleMembershipDnf = 
 				getsimpleMembershipDnf(simpleMembership);
 		ArrayList<String> lhsOfMemConsCombined_ = combinelhsOfMemCons_(lhsOfMemCons_);
-		System.out.println("lhsOfMemConsCombined_: " + lhsOfMemConsCombined_);
+		//System.out.println("lhsOfMemConsCombined_: " + lhsOfMemConsCombined_);
 		ArrayList<ArrayList<Integer> > equalVarIds_ = getEqualVarIds_(lhsOfMemConsCombined_);
 		//System.out.println(equalVarIds);
 		ArrayList<String> vars_ = getVars_(lhsOfMemConsCombined_, equalVarIds_);
@@ -1591,7 +1608,7 @@ public class DemoProgramStr {
 		}
 		//System.out.println(similarIdMap.toString());
 		Set<Integer> similarIdMapValues = new HashSet<Integer>(similarIdMap.values()); 
-		System.out.println("similarIdMapValues : " + similarIdMapValues.toString());
+		//System.out.println("similarIdMapValues : " + similarIdMapValues.toString());
 		ArrayList<Map<Integer, Automaton> > intersections = new ArrayList<Map<Integer, Automaton> >();
 		for (int i = 0; i < automataDisjunctions.size(); i++) {
 			//System.out.println("i : " + i);			
