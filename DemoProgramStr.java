@@ -32,7 +32,7 @@ public class DemoProgramStr {
 		int noOfExaminedConjuncts = 0;
 		try {
             //opening file for reading in Java
-            String file = "/home/hamid/eclipse-workspace/DemoProject/src/sat1.txt";
+            String file = "/home/hamid/eclipse-workspace/DemoProject/src/sat2.txt";
             BufferedReader reader = new BufferedReader(new FileReader(file));
             noOfConjuncts = getNumOfConjuncts(reader);
             System.out.println("Noofconj = " + noOfConjuncts);
@@ -78,7 +78,7 @@ public class DemoProgramStr {
 		//System.out.println("variables_: " + variables_);
 		//System.out.println("refinedIntegerArithDnf_: " + refinedIntegerArithDnf_);
 		if(refinedIntegerArithDnf_.size() == 0) {
-			//System.out.println("memebership constraints are UNSAT");
+			//System.out.println("membership constraints are UNSAT");
 		}
 		else {		
 			final Context context = new Context();
@@ -98,7 +98,8 @@ public class DemoProgramStr {
 				int nextSatIntegerArithDisjId_;
 				boolean stopFlag = false;
 				boolean solution_found = false;
-				while (!stopFlag) {
+				System.out.println("total #over_approx solutions " + refinedIntegerArithDnf_.size());
+				while (true) {
 					int temp_count = 1 + previousSatIntegerArithDisjId + refinedIntegerArithDnf_.size();
 					System.out.println("#remaining over-approx solutions= " + temp_count);
 					// if we already pushed a disjunct of membership constraints, we need to pop 
@@ -109,8 +110,10 @@ public class DemoProgramStr {
 					nextSatIntegerArithDisjId_ = getNextSatIntegerArithDisjId_(refinedIntegerArithDnf_, 
 		                    lengthVariables_, variables_, context, solver, 
 		                    previousSatIntegerArithDisjId);
-					if (previousSatIntegerArithDisjId < refinedIntegerArithDnf_.size()) {
-						//System.out.println("nextSatIntegerArithDisjId_ = " + nextSatIntegerArithDisjId_);
+					System.out.println("nextSatIntegerArithDisjId_ = " + nextSatIntegerArithDisjId_);
+					//if (previousSatIntegerArithDisjId < refinedIntegerArithDnf_.size()) {
+					if (nextSatIntegerArithDisjId_ != -1) {
+						
 						while (solver.check().equals(Status.SATISFIABLE)) {
 							//System.out.println("solver after adding membership constraints= " + solver.toString());						
 							Model model = solver.getModel();
@@ -135,24 +138,29 @@ public class DemoProgramStr {
 						            context,
 						            solver);
 							if (solution_found) {
-								stopFlag = true;
-								result = true;
-								break;							
+								//stopFlag = true;
+								System.out.println("The formula is SAT");	
+								return true;							
 							}
 							else {
+//								IntExpr k_var = lengthVariables_.get(maxLenVar);
+//								BoolExpr underApproxConstraint = 
+//										context.mkGt(k_var, (IntExpr)maxLenVar_expr);
+//								solver.add(underApproxConstraint);
 
-								BoolExpr underApproxConstraint = context.mkBool(false);
+								BoolExpr underApproxConstraint = context.mkBool(true);
 								for (String k: lengthVariables_.keySet()) {
 									IntExpr k_var = lengthVariables_.get(k);
 									BoolExpr under_temp = context.mkGt(k_var, (IntExpr)maxLenVar_expr);
-									underApproxConstraint = context.mkOr(underApproxConstraint, under_temp);
+									underApproxConstraint = context.mkAnd(underApproxConstraint, under_temp);
 								}
 								solver.add(underApproxConstraint);
 							}														
 						}	
 					}
 					else {
-						stopFlag = true;
+						System.out.println("The formula is UNSAT");						
+						break;
 					}					
 					previousSatIntegerArithDisjId = nextSatIntegerArithDisjId_;					
 				}
@@ -791,6 +799,8 @@ public class DemoProgramStr {
 				nextIntegerArithDisjId = nextIntegerArithDisjId + 1;
 			}
 		}
+		System.out.println("No more over-approx solutions to check ");
+		nextIntegerArithDisjId = -1;
 		return nextIntegerArithDisjId;
 	}
 
