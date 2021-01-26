@@ -32,7 +32,7 @@ public class DemoProgramStr {
 		int noOfExaminedConjuncts = 0;
 		try {
             //opening file for reading in Java
-            String file = "/home/hamid/eclipse-workspace/DemoProject/src/sat2.txt";
+            String file = "/home/hamid/eclipse-workspace/DemoProject/src/sat1.txt";
             BufferedReader reader = new BufferedReader(new FileReader(file));
             noOfConjuncts = getNumOfConjuncts(reader);
             System.out.println("Noofconj = " + noOfConjuncts);
@@ -404,8 +404,8 @@ public class DemoProgramStr {
 		//System.out.println("lengthPermutations: " + lengthPermutations);
 		//u_variables_split_count = lengthPermutations.get(7);
 		for (int uid = 0; uid < lengthPermutations.size(); uid++) {
-			System.out.print("under-approximation is checking solution no. " + uid);	
-			System.out.println("out of the " + lengthPermutations.size() + " alternatives");
+			//System.out.print("under-approximation is checking solution no. " + uid);	
+			//System.out.println("out of the " + lengthPermutations.size() + " alternatives");
 			extended_variables = new ArrayList<String> ();
 			u_variables_split_count = lengthPermutations.get(uid);
 			//System.out.println("u_variables_split_count: " + u_variables_split_count);
@@ -503,8 +503,8 @@ public class DemoProgramStr {
 			}
 		}
 		if (!solution_found) {
-			System.out.print("under-approximation has not found a solution");	
-			System.out.println("out of the " + lengthPermutations.size() + " alternatives");	
+			//System.out.print("under-approximation has not found a solution");	
+			//System.out.println("out of the " + lengthPermutations.size() + " alternatives");	
 		}
 		return solution_found;
 	}
@@ -521,22 +521,32 @@ public class DemoProgramStr {
 		List<Automaton> processedRhsOfMemCons =  new ArrayList<Automaton> ();
 		for (int i = 0; i < rhsOfMemCons.size(); i++) {
 			ArrayList<String> LhsOfMemConsI = newLhsOfMemCons.get(i);
-			processedRhsOfMemCons.add(rhsOfMemCons.get(i));
+			Automaton automataI = rhsOfMemCons.get(i);
 			if (LhsOfMemConsI.size() > 0) {
 				processedLhsOfMemCons.add(LhsOfMemConsI);
+				processedRhsOfMemCons.add(automataI);
 			}
 			else {
-				count_new_var++;
-				String c = "fresh_var" + String.valueOf(count_new_var);
-				IntExpr fresh_var = context.mkIntConst("len_" + c);
-				newLengthVariables.put(c, fresh_var);
-				ArrayList<String> newLhsOfMemConsI = new ArrayList<String> ();
-				newLhsOfMemConsI.add(c);
-				processedLhsOfMemCons.add(newLhsOfMemConsI);
-				// add that |fresh_var| = 0
-				BoolExpr emptyVar = context.mkEq(newLengthVariables.get(c), context.mkInt(0));
-				solver.add(emptyVar);
+				if (!(automataI.run("")))
+					return false;				
+//				count_new_var++;
+//				String c = "fresh_var" + String.valueOf(count_new_var);
+//				IntExpr fresh_var = context.mkIntConst("len_" + c);
+//				newLengthVariables.put(c, fresh_var);
+//				ArrayList<String> newLhsOfMemConsI = new ArrayList<String> ();
+//				newLhsOfMemConsI.add(c);
+//				processedLhsOfMemCons.add(newLhsOfMemConsI);
+//				// add that |fresh_var| = 0
+//				BoolExpr emptyVar = context.mkEq(newLengthVariables.get(c), context.mkInt(0));
+//				solver.add(emptyVar);
 			}
+		}
+		if (processedLhsOfMemCons.size() == 0) {
+			System.out.println("The under-approximation found a solution");
+			Model model = solver.getModel();
+			System.out.println(model.toString());
+			return true;
+			
 		}
 		//System.out.println("processedLhsOfMemCons " + processedLhsOfMemCons);
 //		if (processedLhsOfMemCons.size() == 0) { // no membership constraints to test
