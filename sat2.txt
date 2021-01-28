@@ -1,0 +1,10 @@
+#conjuncts:1
+#membership_constraints:4
+A	a+
+B	b+
+C	a+
+D	b+
+#length_constraints:1
+<	(- 1 A)	(+ 3 D)	8
+#equality_constraints:1
+=	A.B	C.D

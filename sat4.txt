@@ -1,0 +1,9 @@
+#conjuncts:1
+#membership_constraints:3
+x.y	(AB|123)+
+x.z	(AB)*
+w	(123)*
+#length_constraints:1
+>=	(+ 1 y)	(- 1 x)	1
+#equality_constraints:1
+=	x.y	z.w
