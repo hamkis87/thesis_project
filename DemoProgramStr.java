@@ -32,7 +32,7 @@ public class DemoProgramStr {
 		int noOfExaminedConjuncts = 0;
 		try {
             //opening file for reading in Java
-            String file = "/home/hamid/eclipse-workspace/DemoProject/src/sat2.txt";
+            String file = "/home/hamid/eclipse-workspace/DemoProject/src/sat5.txt";
             BufferedReader reader = new BufferedReader(new FileReader(file));
             noOfConjuncts = getNumOfConjuncts(reader);
             System.out.println("Noofconj = " + noOfConjuncts);
@@ -110,6 +110,8 @@ public class DemoProgramStr {
 					nextSatIntegerArithDisjId_ = getNextSatIntegerArithDisjId_(refinedIntegerArithDnf_, 
 		                    lengthVariables_, variables_, context, solver, 
 		                    previousSatIntegerArithDisjId);
+					Map<ArrayList<Integer>, Boolean> checkedUnderappSols = 
+							new HashMap<ArrayList<Integer>, Boolean> ();
 					System.out.println("nextSatIntegerArithDisjId_ = " + nextSatIntegerArithDisjId_);
 					//if (previousSatIntegerArithDisjId < refinedIntegerArithDnf_.size()) {
 					if (nextSatIntegerArithDisjId_ != -1) {
@@ -136,7 +138,8 @@ public class DemoProgramStr {
 						            lengthVariables_,
 						            maxLenVar_int,
 						            context,
-						            solver);
+						            solver,
+						            checkedUnderappSols);
 							if (solution_found) {
 								//stopFlag = true;
 								System.out.println("The formula is SAT");	
@@ -147,12 +150,13 @@ public class DemoProgramStr {
 //								BoolExpr underApproxConstraint = 
 //										context.mkGt(k_var, (IntExpr)maxLenVar_expr);
 //								solver.add(underApproxConstraint);
-
-								BoolExpr underApproxConstraint = context.mkBool(true);
+								System.out.println("All Attempts by under-approx failed, therefore");
+								System.out.println("the search space is to be shrinked");
+								BoolExpr underApproxConstraint = context.mkBool(false);
 								for (String k: lengthVariables_.keySet()) {
 									IntExpr k_var = lengthVariables_.get(k);
 									BoolExpr under_temp = context.mkGt(k_var, (IntExpr)maxLenVar_expr);
-									underApproxConstraint = context.mkAnd(underApproxConstraint, under_temp);
+									underApproxConstraint = context.mkOr(underApproxConstraint, under_temp);
 								}
 								solver.add(underApproxConstraint);
 							}														
@@ -211,8 +215,9 @@ public class DemoProgramStr {
 		        //System.out.println(Arrays.toString(data));
 		        String lhsOfMemConsStr = data[0];
 		        //System.out.println("lhsOfMemConsStr " + lhsOfMemConsStr);
-		        for (int i = 0; i < lhsOfMemConsStr.length(); i++) {
-		        	lhsOfMemConsI.add(Character.toString(lhsOfMemConsStr.charAt(i)));		        			        	
+		        String[] lhsOfMemConsStrContents = lhsOfMemConsStr.split("\\.");
+		        for (int i = 0; i < lhsOfMemConsStrContents.length; i++) {
+		        	lhsOfMemConsI.add(lhsOfMemConsStrContents[i]);		        			        	
 		        }
 		        //System.out.println("lhsOfMemConsI " + lhsOfMemConsI);
 		        lhsOfMemCons.add(lhsOfMemConsI);
@@ -387,7 +392,11 @@ public class DemoProgramStr {
 	}
 
 	private static boolean underApproximation_(ArrayList<String> u_variables_, ArrayList<ArrayList<String>> lhsEqDeqCons_,
-			List<EqualityRelation> relLhs2RhsOfEqDeqCons, ArrayList<ArrayList<String>> rhsEqDeqCons_, ArrayList<ArrayList<String>> lhsOfMemCons_, List<Automaton> rhsOfMemCons, List<Map<String, Integer>> lhsOfLenCons_, List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons, Map<String, IntExpr> oldLengthVariables, int maxLenVar_int, Context context, Solver solver) {
+			List<EqualityRelation> relLhs2RhsOfEqDeqCons, ArrayList<ArrayList<String>> rhsEqDeqCons_, 
+			ArrayList<ArrayList<String>> lhsOfMemCons_, List<Automaton> rhsOfMemCons, 
+			List<Map<String, Integer>> lhsOfLenCons_, List<IntegerRelation> relLhs2RhsOfLenCons, 
+			List<Integer> rhsOfLenCons, Map<String, IntExpr> oldLengthVariables, 
+			int maxLenVar_int, Context context, Solver solver, Map<ArrayList<Integer>, Boolean> checkedUnderappSols) {
 		// TODO Auto-generated method stub
 		//System.out.println("****************************************************************");
 		//System.out.println("****************************************************************");
@@ -417,6 +426,9 @@ public class DemoProgramStr {
 			extended_variables = new ArrayList<String> ();
 			u_variables_split_count = lengthPermutations.get(uid);
 			//System.out.println("u_variables_split_count: " + u_variables_split_count);
+			if (checkedUnderappSols.containsKey(u_variables_split_count)) {
+				continue;
+			}
 			for (int i = 0; i < u_variables_.size(); i++) {
 				String c = u_variables_.get(i);
 				int split_count = u_variables_split_count.get(i);
@@ -507,7 +519,8 @@ public class DemoProgramStr {
 				break;					
 			}
 			else {
-				solver.pop();				
+				solver.pop();
+				checkedUnderappSols.put(u_variables_split_count, true);
 			}
 		}
 		if (!solution_found) {
