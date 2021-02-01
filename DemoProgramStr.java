@@ -32,7 +32,7 @@ public class DemoProgramStr {
 		int noOfExaminedConjuncts = 0;
 		try {
             //opening file for reading in Java
-            String file = "/home/hamid/eclipse-workspace/DemoProject/src/sat5.txt";
+            String file = "/home/hamid/eclipse-workspace/DemoProject/src/sat3v311.txt";
             BufferedReader reader = new BufferedReader(new FileReader(file));
             noOfConjuncts = getNumOfConjuncts(reader);
             System.out.println("Noofconj = " + noOfConjuncts);
@@ -74,11 +74,16 @@ public class DemoProgramStr {
 		ArrayList<ArrayList<Map<Integer, Integer> > > refinedIntegerArithDnf_ =
 				new ArrayList<ArrayList<Map<Integer, Integer> > > ();
 		ArrayList<String> variables_ = new ArrayList<String> ();
+		long startTime = System.currentTimeMillis();
+		long endTime = 0;
+		float msecondsElapsed = 0;
 		processMembershipConstraints_(variables_, refinedIntegerArithDnf_, lhsOfMemCons_, rhsOfMemCons);
 		//System.out.println("variables_: " + variables_);
 		//System.out.println("refinedIntegerArithDnf_: " + refinedIntegerArithDnf_);
 		if(refinedIntegerArithDnf_.size() == 0) {
-			//System.out.println("membership constraints are UNSAT");
+			endTime = System.currentTimeMillis();
+			System.out.println("membership constraints are UNSAT");
+			System.out.println("The formula is UNSAT");	
 		}
 		else {		
 			final Context context = new Context();
@@ -126,6 +131,7 @@ public class DemoProgramStr {
 							String maxLenVar_str = maxLenVar_expr.toString();	
 							int maxLenVar_int = Integer.parseInt(maxLenVar_str);
 							//System.out.println("max len var is " + maxLenVar + " with length of " + maxLenVar_int);
+							//System.out.println("solver before starting under-approx after adding test " + solver.toString());
 							solution_found = underApproximation_(variables_, 
 						            lhsEqDeqCons_, 
 						            relLhs2RhsOfEqDeqCons, 
@@ -142,7 +148,13 @@ public class DemoProgramStr {
 						            checkedUnderappSols);
 							if (solution_found) {
 								//stopFlag = true;
+								endTime = System.currentTimeMillis();
 								System.out.println("The formula is SAT");	
+								msecondsElapsed = (endTime - startTime);
+								System.out.println("Elapsed time (milliseconds) = " + msecondsElapsed);
+								System.out.println("The under-approximation found a solution");
+								model = solver.getModel();
+								System.out.println(model.toString());
 								return true;							
 							}
 							else {
@@ -163,6 +175,7 @@ public class DemoProgramStr {
 						}	
 					}
 					else {
+						endTime = System.currentTimeMillis();
 						System.out.println("The formula is UNSAT");						
 						break;
 					}					
@@ -170,8 +183,15 @@ public class DemoProgramStr {
 				}
 				
 			}
+			else {
+				endTime = System.currentTimeMillis();
+				System.out.println("Length constraints are UNSAT");
+				System.out.println("The formula is UNSAT");					
+			}
 			
 		}
+		msecondsElapsed = endTime - startTime;
+		System.out.println("Elapsed time (milliseconds) = " + msecondsElapsed);	
 		return result;
 	}
 	
@@ -499,9 +519,26 @@ public class DemoProgramStr {
 			Map<String, IntExpr> newLengthVariables = makeLengthVariables_(context, extended_variables);
 			//System.out.println("newLengthVariables: " + newLengthVariables);
 			solver.push();
+			//System.out.println("solver before adding length const in under-approx" + solver.toString());
 			addLengthConstraintsToSolver_(newlhsOfLenCons, relLhs2RhsOfLenCons, rhsOfLenCons, 
 					newLengthVariables, context, solver);
+			//System.out.println("solver after adding length const in under-approx" + solver.toString());
+			//System.out.println("Is SAT after adding length const in under-approx" + solver.check());
+			if (!solver.check().equals(Status.SATISFIABLE)) {
+				//System.out.println("Length constraints in under-appr candidate solution are UNSAT");
+				solver.pop();
+				checkedUnderappSols.put(u_variables_split_count, true);
+				continue;
+			}
 			addSplitVariablesToSolver(oldLengthVariables, newLengthVariables, u_variables_split, u_variables_split2, context, solver);
+			//System.out.println("solver after adding split vars");
+			//System.out.println("after the addSplitVariablesToSolver function" + solver.toString());
+			if (!solver.check().equals(Status.SATISFIABLE)) {
+				//System.out.println("Split vars in under-appr candidate solution are UNSAT");
+				solver.pop();
+				checkedUnderappSols.put(u_variables_split_count, true);
+				continue;
+			}
 			solution_found = addMemConstraintsToSolver_(newLhsOfMemCons, rhsOfMemCons, newLengthVariables, context, solver);
 
 			// no need foraddfixedVariablesToSolver
@@ -563,9 +600,9 @@ public class DemoProgramStr {
 			}
 		}
 		if (processedLhsOfMemCons.size() == 0) {
-			System.out.println("The under-approximation found a solution");
-			Model model = solver.getModel();
-			System.out.println(model.toString());
+			//System.out.println("The under-approximation found a solution");
+			//Model model = solver.getModel();
+			//System.out.println(model.toString());
 			return true;
 			
 		}
@@ -592,9 +629,9 @@ public class DemoProgramStr {
 				solver.push();
 				boolean isSat_ = testSat_(nextIntegerArithDisj, newLengthVariables, newVariables_, context, solver);
 				if (isSat_) {
-					System.out.println("The under-approximation found a solution");
-					Model model = solver.getModel();
-					System.out.println(model.toString());
+					//System.out.println("The under-approximation found a solution");
+					//Model model = solver.getModel();
+					//System.out.println(model.toString());
 					result = true;
 					break;
 					//return result;
@@ -604,7 +641,6 @@ public class DemoProgramStr {
 				}				
 			}
 		}
-		//System.out.println("addMemConstraintsToSolver_End");
 		return result; 		
 	}
 
@@ -704,6 +740,8 @@ public class DemoProgramStr {
 		//System.out.println("newLengthVariables = " + newLengthVariables);
 		//System.out.println("variables_split1 = " + variables_split1);
 		//System.out.println("variables_split2 = " + variables_split2);
+		//System.out.println("solver before adding split vars");
+		//System.out.println("inside the addSplitVariablesToSolver function" + solver.toString());
 		for (String leftVar: variables_split1.keySet()) {
 			IntExpr oldVar = oldLengthVariables.get(leftVar);
 			IntExpr extendedVar = context.mkInt(0);			
@@ -724,6 +762,8 @@ public class DemoProgramStr {
 			//System.out.println("b = " + b);
 			solver.add(b);
 		}
+		//System.out.println("solver after adding split vars");
+		//System.out.println("inside the addSplitVariablesToSolver function" + solver.toString());
 	}
 
 	private static void getNewLhsOfLenCons(List<Map<String, Integer>> newLhsOfLenCons,
@@ -1018,6 +1058,7 @@ public class DemoProgramStr {
 			//System.out.println(b.toString());
 			solver.add(b);
 		}
+		//System.out.println("solver after adding length const in under-approx" + solver.toString());
 	}
 	
 	private static Map<String, IntExpr> makeLengthVariables_(Context context, ArrayList<String> variables_) {
