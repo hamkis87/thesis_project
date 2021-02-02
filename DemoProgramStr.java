@@ -32,7 +32,7 @@ public class DemoProgramStr {
 		int noOfExaminedConjuncts = 0;
 		try {
             //opening file for reading in Java
-            String file = "/home/hamid/eclipse-workspace/DemoProject/src/unsat2.txt";
+            String file = "/home/hamid/eclipse-workspace/DemoProject/src/sat6v421.txt";
             BufferedReader reader = new BufferedReader(new FileReader(file));
             noOfConjuncts = getNumOfConjuncts(reader);
             System.out.println("Noofconj = " + noOfConjuncts);
@@ -221,7 +221,7 @@ public class DemoProgramStr {
 				rhsI = (IntExpr) context.mkAdd(x, rhsI);
 			}
 			BoolExpr b = context.mkEq(lhsI, rhsI);
-			System.out.println("b = " + b);
+			//System.out.println("b = " + b);
 			solver.add(b);
 		}
 	}
@@ -470,7 +470,8 @@ public class DemoProgramStr {
 		boolean solution_found = false;
 		ArrayList<ArrayList<Integer>> lengthPermutations = 
 				getPermutations2(maxLenVar_int, u_variables_.size());
-		//System.out.println("lengthPermutations: " + lengthPermutations);
+		System.out.print("under-approximation is checking " + lengthPermutations.size());
+		System.out.println(" possible solutions");
 		//u_variables_split_count = lengthPermutations.get(7);
 		for (int uid = 0; uid < lengthPermutations.size(); uid++) {
 			//System.out.print("under-approximation is checking solution no. " + uid);	
@@ -491,8 +492,8 @@ public class DemoProgramStr {
 				extended_variables.addAll(c_split_into);
 				u_variables_split.put(c, c_split_into);
 			}
-			System.out.println("u_variables_split: " + u_variables_split);
-			System.out.println("extended_variables: " + extended_variables);
+			//System.out.println("u_variables_split: " + u_variables_split);
+			//System.out.println("extended_variables: " + extended_variables);
 			// fixedVars should contain the value(s) for each variable,
 			// for example fixedVars[x1] = {y2,z3} means that x1 = y2 and x1 = z3
 			// fixedVars[x] = {.., x, ..} is not allowed
@@ -504,7 +505,7 @@ public class DemoProgramStr {
 				}		
 			}
 			
-			System.out.println("fixedVars: " + fixedVars);
+			//System.out.println("fixedVars: " + fixedVars);
 			//System.out.println("fixedVars size: " + fixedVars.size());
 			for (int id = 0; id < lhsEqDeqCons_.size(); id++) {
 				// each variable is expressed by its split variables,
@@ -533,16 +534,16 @@ public class DemoProgramStr {
 			}
 			//System.out.println("fixedVars: " + fixedVars);
 			preprocessVars(fixedVars, u_variables_split, u_variables_split2);
-			System.out.println("fixedVars: " + fixedVars);
-			System.out.println("u_variables_split: " + u_variables_split);
-			System.out.println("u_variables_split2: " + u_variables_split2);
+			//System.out.println("fixedVars: " + fixedVars);
+			//System.out.println("u_variables_split: " + u_variables_split);
+			//System.out.println("u_variables_split2: " + u_variables_split2);
 			
 			//System.out.println("Permutations: " + getPermutations(2,2));
 			// In newLhsOfMemCons, variables are substituted according to u_variables_split
 			ArrayList<ArrayList<String>> newLhsOfMemCons = new ArrayList<ArrayList<String>> ();
 			getNewLhsOfMemCons(newLhsOfMemCons, lhsOfMemCons_, u_variables_split2);
-			System.out.println("lhsOfMemCons_: " + lhsOfMemCons_);
-			System.out.println("newLhsOfMemCons: " + newLhsOfMemCons);
+			//System.out.println("lhsOfMemCons_: " + lhsOfMemCons_);
+			//System.out.println("newLhsOfMemCons: " + newLhsOfMemCons);
 			// ArrayList<ArrayList<String>> lhsOfLenCons_, List<IntegerRelation> relLhs2RhsOfLenCons, List<Integer> rhsOfLenCons
 			List<Map<String, Integer>>  newlhsOfLenCons = new ArrayList<Map<String, Integer>> ();
 			getNewLhsOfLenCons(newlhsOfLenCons, lhsOfLenCons_, u_variables_split2);
@@ -554,10 +555,10 @@ public class DemoProgramStr {
 			//System.out.println("solver before adding length const in under-approx" + solver.toString());
 			addLengthConstraintsToSolver_(newlhsOfLenCons, relLhs2RhsOfLenCons, rhsOfLenCons, 
 					newLengthVariables, context, solver);
-			System.out.println("solver after adding length const in under-approx" + solver.toString());
+			//System.out.println("solver after adding length const in under-approx" + solver.toString());
 			//System.out.println("Is SAT after adding length const in under-approx" + solver.check());
 			if (!solver.check().equals(Status.SATISFIABLE)) {
-				System.out.println("Length constraints in under-appr candidate solution are UNSAT");
+				//System.out.println("Length constraints in under-appr candidate solution are UNSAT");
 				solver.pop();
 				checkedUnderappSols.put(u_variables_split_count, true);
 				continue;
