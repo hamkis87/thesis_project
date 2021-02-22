@@ -32,7 +32,7 @@ public class DemoProgramStr {
 		int noOfExaminedConjuncts = 0;
 		try {
             //opening file for reading in Java
-            String file = "/home/hamid/eclipse-workspace/DemoProject/src/sat6v421.txt";
+            String file = "/home/hamid/eclipse-workspace/DemoProject/src/sat2v121.txt";
             BufferedReader reader = new BufferedReader(new FileReader(file));
             noOfConjuncts = getNumOfConjuncts(reader);
             System.out.println("Noofconj = " + noOfConjuncts);
@@ -89,7 +89,7 @@ public class DemoProgramStr {
 			final Context context = new Context();
 			final Solver solver = context.mkSimpleSolver();
 			Map<String, IntExpr> lengthVariables_ = makeLengthVariables_(context, variables_);
-			System.out.println("lengthVariables_ = " + lengthVariables_);
+			//System.out.println("lengthVariables_ = " + lengthVariables_);
 			addLengthConstraintsToSolver_(lhsOfLenCons_, relLhs2RhsOfLenCons, rhsOfLenCons, 
 					                     lengthVariables_, context, solver);
 			//System.out.println("solver after adding length constraints= " + solver.toString());
@@ -107,24 +107,25 @@ public class DemoProgramStr {
 				}
 				int previousSatIntegerArithDisjId = -1;
 				//solver.push();
-				int nextSatIntegerArithDisjId_;
+				int nextSatIntegerArithDisjId_ = 0;
 				boolean stopFlag = false;
 				boolean solution_found = false;
-				System.out.println("total #over_approx solutions " + refinedIntegerArithDnf_.size());
+				//System.out.println("total #over_approx solutions " + refinedIntegerArithDnf_.size());
 				while (true) {
-					int temp_count = 1 + previousSatIntegerArithDisjId + refinedIntegerArithDnf_.size();
-					System.out.println("#remaining over-approx solutions= " + temp_count);
+					int temp_count = refinedIntegerArithDnf_.size() - nextSatIntegerArithDisjId_;
+					//System.out.println("#remaining over-approx solutions= " + temp_count);
 					// if we already pushed a disjunct of membership constraints, we need to pop 
 					// them before we push the next disjunct
 					if (previousSatIntegerArithDisjId > -1) {
 						solver.pop();
 					}
+					//System.out.println("solver in the while loop " + solver.toString());
 					nextSatIntegerArithDisjId_ = getNextSatIntegerArithDisjId_(refinedIntegerArithDnf_, 
 		                    lengthVariables_, variables_, context, solver, 
 		                    previousSatIntegerArithDisjId);
 					Map<ArrayList<Integer>, Boolean> checkedUnderappSols = 
 							new HashMap<ArrayList<Integer>, Boolean> ();
-					System.out.println("nextSatIntegerArithDisjId_ = " + nextSatIntegerArithDisjId_);
+					//System.out.println("nextSatIntegerArithDisjId_ = " + nextSatIntegerArithDisjId_);
 					//if (previousSatIntegerArithDisjId < refinedIntegerArithDnf_.size()) {
 					if (nextSatIntegerArithDisjId_ != -1) {
 						
@@ -165,12 +166,14 @@ public class DemoProgramStr {
 								return true;							
 							}
 							else {
+								System.out.print("lengthVariables_.keySet() = ");
+								System.out.println(lengthVariables_.keySet());
 //								IntExpr k_var = lengthVariables_.get(maxLenVar);
 //								BoolExpr underApproxConstraint = 
 //										context.mkGt(k_var, (IntExpr)maxLenVar_expr);
 //								solver.add(underApproxConstraint);
-								System.out.println("All Attempts by under-approx failed, therefore");
-								System.out.println("the search space is to be shrinked");
+								//System.out.println("All Attempts by under-approx failed, therefore");
+								//System.out.println("the search space is to be shrinked");
 								BoolExpr underApproxConstraint = context.mkBool(false);
 								for (String k: lengthVariables_.keySet()) {
 									IntExpr k_var = lengthVariables_.get(k);
@@ -190,6 +193,7 @@ public class DemoProgramStr {
 				}
 				
 			}
+			// Length constraints are not satisfiable
 			else {
 				endTime = System.currentTimeMillis();
 				System.out.println("Length constraints are UNSAT");
@@ -224,6 +228,7 @@ public class DemoProgramStr {
 			//System.out.println("b = " + b);
 			solver.add(b);
 		}
+		//System.out.println("solver after adding length constraints from equations= " + solver.toString());
 	}
 
 
@@ -470,8 +475,8 @@ public class DemoProgramStr {
 		boolean solution_found = false;
 		ArrayList<ArrayList<Integer>> lengthPermutations = 
 				getPermutations2(maxLenVar_int, u_variables_.size());
-		System.out.print("under-approximation is checking " + lengthPermutations.size());
-		System.out.println(" possible solutions");
+		//System.out.print("under-approximation is checking " + lengthPermutations.size());
+		//System.out.println(" possible solutions");
 		//u_variables_split_count = lengthPermutations.get(7);
 		for (int uid = 0; uid < lengthPermutations.size(); uid++) {
 			//System.out.print("under-approximation is checking solution no. " + uid);	
@@ -808,7 +813,13 @@ public class DemoProgramStr {
 			for (String strVar: oldLenCons.keySet()) {
 				int varLength = oldLenCons.get(strVar);
 				for (String s: variables_split.get(strVar)) {
-					newLenCons.put(s, varLength);																									
+					if (newLenCons.containsKey(s)) {
+						newLenCons.put(s, varLength + newLenCons.get(s));						
+					}
+					else {
+						newLenCons.put(s, varLength);						
+					}
+																														
 				}
 			}
 			newLhsOfLenCons.add(newLenCons);
@@ -871,12 +882,13 @@ public class DemoProgramStr {
 		// the previous IntegerArithDisj didn't result in SAT constraints, so 
 		// have to examine the next IntegerArithDisj
 		int nextIntegerArithDisjId = previousSatIntegerArithDisjId + 1;
-		while(nextIntegerArithDisjId < refinedIntegerArithDnf_.size()) {	 
+		while(nextIntegerArithDisjId < refinedIntegerArithDnf_.size()) {
+			//System.out.println("nextIntegerArithDisjId " + nextIntegerArithDisjId);
 			ArrayList<Map<Integer, Integer>> nextIntegerArithDisj = 
 					refinedIntegerArithDnf_.get(nextIntegerArithDisjId);
 			solver.push();
 			boolean isSat_ = testSat_(nextIntegerArithDisj, lengthVariables_, variables_, context, solver);
-			System.out.println("isSat = " + isSat_);
+			//System.out.println("isSat = " + isSat_);
 			if (isSat_) {
 				return nextIntegerArithDisjId;				
 			}
