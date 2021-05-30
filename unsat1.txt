@@ -1,0 +1,8 @@
+#conjuncts:1
+#membership_constraints:1
+x.y	(ab)+
+#length_constraints:2
+<	(+ 1 y)	6
+=	(+ 1 x)	3
+#equality_constraints:1
+=	x	y

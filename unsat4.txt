@@ -1,0 +1,14 @@
+#conjuncts:1
+#membership_constraints:5
+a.b.c	(A|B|C)+
+d.e	(B)+
+f	(D)+
+g	(A)+
+h	(B)+
+#length_constraints:2
+=	(+ 1 a)	(+ 1 b)	(+ 1 c)	3
+>	(+ 1 f)	0
+#equality_constraints:3
+=	a	g
+=	h	b
+=	f	c
