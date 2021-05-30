@@ -1,10 +1,11 @@
 #conjuncts:1
-#membership_constraints:5
-a.b.c	(A|B|C)+
-d.e	(E|D)+
-f.g	(A|B)+
-h.i	(D|C)+
-j	(K)+
+#membership_constraints:6
+a.b.c	(A|B|C)*
+d.e	(E|D)*
+f.g	(A|B)*
+h.i	(DC|CD)
+j.a	(EA|AE)
+k.b.l	(ABC)+
 #length_constraints:3
 =	(+ 1 a)	(+ 1 b)	(+ 1 c)	(+ 1 d)	4
 >	(+ 1 h)	(+ 1 e)	(+ 1 f)	(+ 1 g)	3

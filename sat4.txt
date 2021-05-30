@@ -1,9 +1,12 @@
 #conjuncts:1
-#membership_constraints:3
-x.y	(AB|123)+
-x.z	(AB)*
-w	(123)*
-#length_constraints:1
->=	(+ 1 y)	(- 1 x)	1
-#equality_constraints:1
-=	x.y	z.w
+#membership_constraints:4
+A.B	ababab
+C.D	bababa
+E.F	a*
+G.H	b
+#length_constraints:2
+<=	(+ 1 A)	3
+<=	(+ 1 B)	3
+#equality_constraints:2
+=	A	D
+=	B	C

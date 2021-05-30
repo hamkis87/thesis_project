@@ -1,0 +1,11 @@
+#conjuncts:1
+#membership_constraints:2
+x.z	(a|b)+
+w.y	(a|b)+
+#length_constraints:4
+=	(+ 1 x)	40
+>	(+ 1 y)	0
+>	(+ 1 z)	0
+>	(+ 1 w)	0
+#equality_constraints:1
+=	x	y

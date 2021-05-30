@@ -1,7 +1,9 @@
 #conjuncts:1
-#membership_constraints:2
-x.y	(ab)+
-z.w	(cd)*
+#membership_constraints:4
+x.y.x1.y1.x2.y2	(a|b)*
+z.w.z1.w1.z2.w2	(c|d)*
+A.B.C.A1.B1.C1	(a|b)*
+D.E.F.G.D1.E1.F1	(c|d)*
 #length_constraints:4
 <	(+ 1 y)	2
 >=	(+ 1 x)	4

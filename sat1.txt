@@ -1,12 +1,8 @@
 #conjuncts:1
-#membership_constraints:3
-x.y.m	(a|b|c)*
-m	b*
-z.w	(a|b)*
-#length_constraints:3
->	(+ 1 x)	(- 1 m)	1
-<	(+ 2 w)	(+ 1 z)	(+ 1 y)	10
->=	(+ 3 x)	9
-#equality_constraints:2
-=	z.w.m	m.y.y
-=	m.y	w.m
+#membership_constraints:1
+x.y	(ab)+
+#length_constraints:2
+<	(+ 1 y)	6
+=	(+ 1 x)	4
+#equality_constraints:1
+=	x.y	y.x
