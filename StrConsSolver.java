@@ -32,7 +32,7 @@ public class StrConsSolver {
 		int noOfExaminedConjuncts = 0;
 		try {
             //opening file for reading in Java
-            String file = "/home/hamid/eclipse-workspace/DemoProject/src/sat2.txt";
+            String file = "/home/hamid/eclipse-workspace/DemoProject/src/example.txt";
             BufferedReader reader = new BufferedReader(new FileReader(file));
             noOfConjuncts = getNumOfConjuncts(reader);
             System.out.println("Noofconj = " + noOfConjuncts);
@@ -163,6 +163,7 @@ public class StrConsSolver {
 								System.out.println("Elapsed time (milliseconds) = " + msecondsElapsed);
 								System.out.println("The under-approximation found a solution");
 								model = solver.getModel();
+								System.out.println("solver after adding constraints from under-appr: " + solver.toString());
 								System.out.println(model.toString());
 								return true;							
 							}
@@ -484,7 +485,7 @@ public class StrConsSolver {
 			//System.out.println("out of the " + lengthPermutations.size() + " alternatives");
 			extended_variables = new ArrayList<String> ();
 			u_variables_split_count = lengthPermutations.get(uid);
-			//System.out.println("u_variables_split_count: " + u_variables_split_count);
+			System.out.println("u_variables_split_count: " + u_variables_split_count);
 			if (checkedUnderappSols.containsKey(u_variables_split_count)) {
 				continue;
 			}
@@ -498,7 +499,7 @@ public class StrConsSolver {
 				extended_variables.addAll(c_split_into);
 				u_variables_split.put(c, c_split_into);
 			}
-			//System.out.println("u_variables_split: " + u_variables_split);
+			System.out.println("u_variables_split: " + u_variables_split);
 			//System.out.println("extended_variables: " + extended_variables);
 			// fixedVars should contain the value(s) for each variable,
 			// for example fixedVars[x1] = {y2,z3} means that x1 = y2 and x1 = z3
@@ -542,7 +543,7 @@ public class StrConsSolver {
 			preprocessVars(fixedVars, u_variables_split, u_variables_split2);
 			//System.out.println("fixedVars: " + fixedVars);
 			//System.out.println("u_variables_split: " + u_variables_split);
-			//System.out.println("u_variables_split2: " + u_variables_split2);
+			System.out.println("u_variables_split2: " + u_variables_split2);
 			
 			//System.out.println("Permutations: " + getPermutations(2,2));
 			// In newLhsOfMemCons, variables are substituted according to u_variables_split
@@ -559,12 +560,12 @@ public class StrConsSolver {
 			//System.out.println("newLengthVariables: " + newLengthVariables);
 			solver.push();
 			//System.out.println("solver before adding length const in under-approx" + solver.toString());
-			addLengthConstraintsToSolver_(newlhsOfLenCons, relLhs2RhsOfLenCons, rhsOfLenCons, 
-					newLengthVariables, context, solver);
+			//addLengthConstraintsToSolver_(newlhsOfLenCons, relLhs2RhsOfLenCons, rhsOfLenCons, 
+				//	newLengthVariables, context, solver);
 			//System.out.println("solver after adding length const in under-approx" + solver.toString());
 			//System.out.println("Is SAT after adding length const in under-approx" + solver.check());
 			if (!solver.check().equals(Status.SATISFIABLE)) {
-				//System.out.println("Length constraints in under-appr candidate solution are UNSAT");
+				System.out.println("Length constraints in under-appr candidate solution are UNSAT");
 				solver.pop();
 				checkedUnderappSols.put(u_variables_split_count, true);
 				continue;
@@ -573,7 +574,7 @@ public class StrConsSolver {
 			//System.out.println("solver after adding split vars");
 			//System.out.println("after the addSplitVariablesToSolver function" + solver.toString());
 			if (!solver.check().equals(Status.SATISFIABLE)) {
-				//System.out.println("Split vars in under-appr candidate solution are UNSAT");
+				System.out.println("Split vars in under-appr candidate solution are UNSAT");
 				solver.pop();
 				checkedUnderappSols.put(u_variables_split_count, true);
 				continue;
@@ -596,6 +597,7 @@ public class StrConsSolver {
 				break;					
 			}
 			else {
+				System.out.println("Membership constraits in under-appr candidate solution are UNSAT");
 				solver.pop();
 				checkedUnderappSols.put(u_variables_split_count, true);
 			}
@@ -685,8 +687,115 @@ public class StrConsSolver {
 		return result; 		
 	}
 
-
+	private static boolean hasCommon(TreeSet<String> set1, TreeSet<String> set2) {
+		boolean result = false;
+		for (String s: set1) {
+			if(set2.contains(s)) {
+				result = true;
+				break;
+			}
+		}
+		return result;
+	} 
+	
+	private static TreeSet<String> uniteSets(TreeSet<String> set1, TreeSet<String> set2) {
+		TreeSet<String> set3 = new TreeSet<String> ();
+		for (String s: set1) {
+			set3.add(s);
+		}
+		for (String s: set2) {
+			set3.add(s);
+		}
+		return set3;
+	}
+	
 	private static void preprocessVars(Map<String, HashSet<String>> fixedVars, Map<String, ArrayList<String>> u_variables_split1, Map<String, ArrayList<String>> u_variables_split2) {
+		// TODO Auto-generated method stub		
+		ArrayList<TreeSet<String>> fixedVarsSets = new ArrayList<TreeSet<String>> ();
+		for (String key: fixedVars.keySet()) {
+			TreeSet<String> equalVars = new TreeSet<String> ();
+			equalVars.add(key);
+			HashSet<String> vals = fixedVars.get(key);
+			for (String s: vals) {
+				equalVars.add(s);				
+			}
+			fixedVarsSets.add(equalVars);
+		}
+		//System.out.println("fixedVarsSets = " + fixedVarsSets);
+		
+		int i = 0;		
+		while(i < fixedVarsSets.size()) {
+			boolean flag2 = false;
+			TreeSet<String> set1 = fixedVarsSets.get(i);
+			for (int j = i+1; j < fixedVarsSets.size(); j++) {
+				TreeSet<String> set2 = fixedVarsSets.get(j);					
+				if(hasCommon(set1, set2)) {
+					TreeSet<String> set3 = uniteSets(set1, set2);
+					fixedVarsSets.remove(j);
+					fixedVarsSets.add(j, set3);
+					flag2 = true;
+				}	
+			}
+			if(flag2) {
+				fixedVarsSets.remove(i);					
+			}
+			else {
+				i++;
+			}
+		}
+		
+		Map<Integer, TreeSet<String>> equalVarsClusters = new HashMap<Integer, TreeSet<String>> ();
+		for (int k = 0; k < fixedVarsSets.size(); k++) {
+			TreeSet<String> varsCluster = fixedVarsSets.get(k);
+			equalVarsClusters.put(k+1, varsCluster);									
+		}
+		Map<String, Integer> equalVarsMap = new HashMap<String, Integer> ();
+		for (Integer key: equalVarsClusters.keySet()) {
+			for (String s: equalVarsClusters.get(key)) {
+				equalVarsMap.put(s, key);				
+			}			
+		}
+		
+		//System.out.println("equalVarsMap = " + equalVarsMap);
+		//System.out.println("equalVarsClusters = " + equalVarsClusters);
+		Map<Integer, String> equalVarsMap2 = new HashMap<Integer, String> ();
+		for (Integer key: equalVarsClusters.keySet()) {
+			TreeSet<String> equalVarsSet = equalVarsClusters.get(key);
+			if (equalVarsSet.contains("EPSILON")) {
+				equalVarsMap2.put(key, "EPSILON");								
+			}
+			else {
+				equalVarsMap2.put(key, equalVarsSet.last());								
+			}
+		}
+		
+		//System.out.println("u_variables_split1 = " + u_variables_split1);
+		for (String s: u_variables_split1.keySet()) {
+			ArrayList<String> s_split_into1 = u_variables_split1.get(s);
+			ArrayList<String> s_split_into2 = new ArrayList<String> ();
+			if (s_split_into1.size() == 0) {
+				u_variables_split2.put(s, s_split_into2);				
+			}
+			else {
+				for (int l = 0; l < s_split_into1.size(); l++) {
+					String v1 = s_split_into1.get(l);
+					if (equalVarsMap.containsKey(v1)) {
+						String v2 = equalVarsMap2.get(equalVarsMap.get(v1));
+						if (!v2.equals("EPSILON")) {
+							s_split_into2.add(v2);						
+						}
+					}
+					else {
+						s_split_into2.add(v1);					
+					}
+					u_variables_split2.put(s, s_split_into2);
+				}
+			}
+		}
+		//System.out.println("u_variables_split2 = " + u_variables_split2);		
+	}
+
+	private static void preprocessVars2(Map<String, HashSet<String>> fixedVars, Map<String, ArrayList<String>> u_variables_split1, Map<String, ArrayList<String>> u_variables_split2) {
 		// TODO Auto-generated method stub
 		int count = 0;
 		Map<String, Integer> equalVarsMap = new HashMap<String, Integer> ();
@@ -747,8 +856,8 @@ public class StrConsSolver {
 				equalVarsMap2.put(key, equalVarsSet.last());								
 			}
 		}
-		//System.out.println("equalVarsMap2 = " + equalVarsMap2);
-		//System.out.println("u_variables_split1 = " + u_variables_split1);
+		System.out.println("equalVarsMap2 = " + equalVarsMap2);
+		System.out.println("u_variables_split1 = " + u_variables_split1);
 		for (String s: u_variables_split1.keySet()) {
 			ArrayList<String> s_split_into1 = u_variables_split1.get(s);
 			ArrayList<String> s_split_into2 = new ArrayList<String> ();
@@ -758,8 +867,10 @@ public class StrConsSolver {
 			else {
 				for (int i = 0; i < s_split_into1.size(); i++) {
 					String v1 = s_split_into1.get(i);
+					System.out.println("v1 = " + v1);
 					if (equalVarsMap.containsKey(v1)) {
 						String v2 = equalVarsMap2.get(equalVarsMap.get(v1));
+						System.out.println("v2 = " + v2);
 						if (!v2.equals("EPSILON")) {
 							s_split_into2.add(v2);						
 						}
