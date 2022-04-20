@@ -1,0 +1,8 @@
+#conjuncts:1
+#membership_constraints:2
+x.y.z	(a|b)+
+y.z	(ab)+
+#length_constraints:1
+>	(+ 1 x)	(+ 1 y)	3
+#equality_constraints:1
+=	x	y.z
